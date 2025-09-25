@@ -1,0 +1,22 @@
+@Farmai.Api_HostAddress = https://localhost:7183
+@json = application/json
+
+### Ping Swagger JSON (opcional)
+GET {{Farmai.Api_HostAddress}}/swagger/v1/swagger.json
+Accept: application/json
+
+### WeatherForecast (plantilla)
+GET {{Farmai.Api_HostAddress}}/WeatherForecast
+Accept: application/json
+
+### Crear medicamento
+POST {{Farmai.Api_HostAddress}}/api/Medicamentos
+Content-Type: {{json}}
+
+{
+  "nombre": "Paracetamol (test)"
+}
+
+### Listar medicamentos
+GET {{Farmai.Api_HostAddress}}/api/Medicamentos
+Accept: application/json
