@@ -139,14 +139,81 @@ def load_sitreg(xml_path, conn):
         )
     return len(rows)
 
+def load_atc(xml_path, conn):
+    from lxml import etree
+    ns = {'ns': 'http://schemas.aemps.es/prescripcion/aemps_prescripcion_atc'}
+    context = etree.iterparse(xml_path, tag='{http://schemas.aemps.es/prescripcion/aemps_prescripcion_atc}atc', events=("end",))
+    rows = []
+    for _, atc in context:
+        codigo = atc.findtext('ns:codigoatc', default=None, namespaces=ns)
+        nombre = atc.findtext('ns:descatc', default=None, namespaces=ns)
+        if not codigo or not nombre:
+            atc.clear()
+            continue
+        length = len(codigo)
+        if length not in (1, 3, 4, 5, 7):
+            print(f"[WARN] Longitud inválida {length} para {codigo}", file=sys.stderr)
+            atc.clear()
+            continue
+        nivel = {1: 1, 3: 2, 4: 3, 5: 4, 7: 5}[length]
+        if length == 3:
+            codigo_padre = codigo[0]  # e.g., "R" para "R03"
+        elif length == 4:
+            codigo_padre = codigo[:3]
+        elif length == 5:
+            codigo_padre = codigo[:4]
+        elif length == 7:
+            codigo_padre = codigo[:5]
+        else:
+            codigo_padre = None
+        rows.append((codigo, nombre.strip(), nivel, codigo_padre))
+        atc.clear()
+    with conn, conn.cursor() as cur:
+        cur.execute('TRUNCATE "AtcXmlTemp";')
+        cur.executemany(
+            'INSERT INTO "AtcXmlTemp" ("Codigo","Nombre","Nivel","CodigoPadre") '
+            'VALUES (%s,%s,%s,%s) '
+            'ON CONFLICT ("Codigo") DO UPDATE SET '
+            '"Nombre"=EXCLUDED."Nombre", "Nivel"=EXCLUDED."Nivel", "CodigoPadre"=EXCLUDED."CodigoPadre";',
+            rows
+        )
+    return len(rows)
+
+def load_principios_activos(xml_path, conn):
+    from lxml import etree
+    ns = {'ns': 'http://schemas.aemps.es/prescripcion/aemps_prescripcion_principios_activos'}
+    context = etree.iterparse(xml_path, tag='{http://schemas.aemps.es/prescripcion/aemps_prescripcion_principios_activos}principiosactivos', events=("end",))
+    rows = []
+    invalid = 0
+    for _, pa in context:
+        codigo = pa.findtext('ns:nroprincipioactivo', default=None, namespaces=ns)
+        nombre = pa.findtext('ns:principioactivo', default=None, namespaces=ns)
+        lista = pa.findtext('ns:lista', default=None, namespaces=ns)
+        if not codigo or not nombre:
+            print(f"[WARN] Entrada inválida: codigo={codigo}, nombre={nombre}", file=sys.stderr)
+            invalid += 1
+            pa.clear()
+            continue
+        rows.append((codigo, nombre.strip(), lista))
+        pa.clear()
+    print(f"[INFO] Filas válidas: {len(rows)}, inválidas: {invalid}", file=sys.stderr)
+    with conn, conn.cursor() as cur:
+        cur.execute('TRUNCATE "PrincipiosActivosXmlTemp";')
+        cur.executemany(
+            'INSERT INTO "PrincipiosActivosXmlTemp" ("Codigo","Nombre","Lista") '
+            'VALUES (%s,%s,%s) '
+            'ON CONFLICT ("Codigo") DO UPDATE SET '
+            '"Nombre"=EXCLUDED."Nombre", "Lista"=EXCLUDED."Lista";',
+            rows
+        )
+    return len(rows)
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dsn", required=True)
     ap.add_argument("--xml", required=True, help="Ruta al XML")
     ap.add_argument("--kind", required=True, choices=[
-        "laboratorios","vias","forma","forma_simpl","sitreg"
-    ])
+        "laboratorios", "vias", "forma", "forma_simpl", "sitreg", "atc", "principios_activos"    ])
     args = ap.parse_args()
     conn = psycopg2.connect(args.dsn); conn.autocommit = True
 
@@ -165,6 +232,10 @@ def main():
         n=load_forma(xmlp, conn, "FormaFarmaceuticaSimplificadaDicStaging", "simplificada"); print(f"[OK] FormaFarmaceuticaSimplificada cargadas: {n}")
     elif args.kind=="sitreg":
         n=load_sitreg(xmlp, conn); print(f"[OK] SituacionRegistro cargadas: {n}")
+    elif args.kind == "atc":
+        n = load_atc(xmlp, conn); print(f"[OK] ATC cargados: {n}")
+    elif args.kind == "principios_activos":
+        n = load_principios_activos(xmlp, conn); print(f"[OK] Principios Activos cargados: {n}")
     else:
         print("[ERROR] kind no soportado", file=sys.stderr); sys.exit(3)
 

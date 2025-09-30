@@ -1,10 +1,5 @@
 ﻿# etl/python/load_prescripcion_stream.py
-# Carga Prescripcion.xml en streaming a una tabla destino (p.ej. PrescripcionStaging_NUEVA)
-# Uso:
-#   python etl/python/load_prescripcion_stream.py ^
-#     --xml "C:\Users\Victor\Desktop\FARMAI\prescripcion\Prescripcion.xml" ^
-#     --dsn "host=127.0.0.1 port=5433 dbname=farmai_db user=farmai_etl_user password=Iaforeverfree" ^
-#     --table PrescripcionStaging_NUEVA --batch 1000
+
 
 import argparse, time, sys
 from lxml import etree

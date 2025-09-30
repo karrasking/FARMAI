@@ -3,10 +3,10 @@ namespace Farmai.Api.Services;
 
 public interface IZipOrXmlFetcher
 {
-    // Nuevo orquestador (ZIP completo + manifest + copia a latest)
+    // Orquestador: descarga ZIP/XML, extrae y copia a 'latest'
     Task<ZipFetchResult> FetchAllAsync(string url, CancellationToken ct = default);
 
-    // Compatibilidad con tu endpoint antiguo (lo implementaremos como wrapper)
+    // Compatibilidad con el endpoint antiguo (wrapper sobre FetchAllAsync)
     Task<FetchPrescripcionResult> FetchPrescripcionXmlAsync(string url, CancellationToken ct = default);
 }
 
