@@ -1,0 +1,380 @@
+## **Roadmap del Proyecto v2.0: Sistema de Soporte a la Decisión Clínica Farmacéutica**
+
+### **1. Resumen Ejecutivo**
+
+*   **Objetivo:** Construir un Sistema de Soporte a la Decisión Clínica (CDSS) que identifique los efectos adversos de los medicamentos y proponga soluciones (farmacológicas, de parafarmacia y consejos) para mitigarlos, priorizadas según su evidencia y frecuencia.
+*   **Activo Principal:** Un Grafo de Conocimiento Clínico propietario, con conceptos normalizados (SNOMED CT), relaciones enriquecidas (frecuencia, nivel de evidencia) y validado por un equipo de expertos médicos y farmacéuticos.
+*   **Ventaja Competitiva:** Creamos una capa de inteligencia (`Efecto Adverso` -> `ES ALIVIADO POR` -> `Producto/Remedio`) que no existe en las bases de datos oficiales, aportando una solución directa, contextualizada y accionable al profesional sanitario.
+*   **Mercados Potenciales:** Farmacias Comunitarias, Médicos de Atención Primaria/Especializada, Hospitales e Industria Farmacéutica, a través de una plataforma en la nube (SaaS) con acceso vía API.
+
+### **2. Análisis de la Situación y Descubrimientos Clave**
+
+*(Esta sección permanece sin cambios, ya que documenta los hallazgos iniciales que fundamentan el proyecto)*
+
+Nuestra investigación inicial se centró en la descarga de ficheros estáticos del Nomenclátor (XMLs). Sin embargo, el descubrimiento de la documentación de la **API REST de CIMA** ha redefinido por completo nuestra estrategia de adquisición de datos. Los hallazgos clave son el acceso programático en tiempo real, el formato de datos JSON moderno, y endpoints específicos para catálogos (`maestras`), fichas técnicas (`docSegmentado`) y sincronización (`registroCambios`).
+
+### **3. Arquitectura y Pila Tecnológica**
+
+*   **Entorno de Desarrollo (IDE):** **Visual Studio 2022**.
+*   **Lenguaje y Framework Backend:** **C# con .NET 8**.
+*   **Data Lake (Almacenamiento de Brutos):** **Azure Blob Storage** (o similar). Su rol es almacenar una copia 1:1 de los JSONs originales de la API de CIMA. Esto garantiza la trazabilidad y nos permite re-procesar los datos a futuro sin depender de la API externa.
+*   **Base de Datos Relacional (Staging Area):** **PostgreSQL (PSQL)**, configurado en local para la fase de desarrollo. Su rol será almacenar los datos estructurados de AEMPS y el texto relevante y segmentado de las fichas técnicas, listo para ser procesado.
+*   **Base de Datos de Grafos (Cerebro del Sistema):** **Neo4j** (o similar). Aquí se construirá y residirá nuestro Grafo de Conocimiento Clínico.
+*   **Procesamiento de Lenguaje (NLP/LLM):** **Azure OpenAI Service** (o similar) para la extracción de entidades, su contexto y un score de confianza.
+*   **Control de Versiones:** **Git** (en un repositorio de GitHub o Azure DevOps).
+
+### **4. Hoja de Ruta por Fases**
+
+#### **Fase 1: Cimientos y Configuración del Entorno (Duración: 1-2 semanas)**
+*   **Objetivo:** Tener un entorno de desarrollo local funcional y validar la comunicación con la API de CIMA.
+    *   **1.1.** Crear una nueva Solución en Visual Studio ("ClinicalGraph.sln") con un proyecto de API Web en .NET 8.
+    *   **1.2.** Instalar y configurar un servidor PostgreSQL local. Crear la base de datos ("cima_staging_db").
+    *   **1.3.** Diseñar y crear las tablas SQL para los catálogos principales (ej. `formas\\\_farmaceuticas`, `vias\\\_administracion`).
+    *   **1.4.** Desarrollar un cliente de API en C# para realizar una llamada de prueba al endpoint `GET maestras` y volcar el resultado.
+    *   **1.5.** Configurar el repositorio Git.
+
+#### **Fase 2: Ingesta Masiva y Estructuración de Datos (Duración: 4-6 semanas)**
+*   **Objetivo:** Crear una réplica local, completa y organizada de toda la materia prima de AEMPS.
+    *   **2.1.** Desarrollar un servicio de ingesta ("Ingestion Service").
+    *   **2.2.** Implementar la lógica para poblar todas las tablas de catálogo en PSQL desde el endpoint `GET maestras`.
+    *   **2.3.** Implementar el proceso principal de carga masiva (a ejecutarse una sola vez):
+        *   a. Obtener la lista completa de todos los `nregistro` de medicamentos.
+        *   b. Crear un bucle que, para cada `nregistro`:
+            *   i. Llame a `GET medicamento` para sus datos estructurados.
+            *   ii. Llame a `GET docSegmentado/contenido/1` para su Ficha Técnica en JSON.
+            *   iii. **(Nuevo)** Guarde el JSON original y completo de la ficha técnica en el **Data Lake** (Azure Blob Storage).
+            *   iv. Guarde los datos estructurados y el texto segmentado de la ficha en las tablas de **PostgreSQL**.
+    *   **Hito Clave:** Un Data Lake con los datos en bruto y una base de datos PostgreSQL con la materia prima limpia y organizada, lista para ser procesada.
+
+#### **Fase 3: La Capa de Inteligencia - Grafo y Curación (Duración: 8-12 semanas)**
+*   **Objetivo:** Transformar los datos en bruto en conocimiento clínico validado y accionable dentro del grafo.
+    *   **3.1.** Instalar y configurar la base de datos de grafos (Neo4j).
+    *   **3.2.** Diseñar el modelo del grafo:
+        *   **Nodos:** `Medicamento`, `PrincipioActivo`, `EfectoAdverso` (normalizado con SNOMED CT), `Remedio` (con etiquetas adicionales como `Farmaco`, `Parafarmacia`, `ConsejoNoFarmacologico`), y nodos para futuro contexto como `Patologia`, `Condicion`.
+        *   **Relaciones:** `CONTIENE`, `TRATA`, `PROVOCA` (con propiedad `frecuencia`), `ALIVIA` (con propiedad `nivel\\\_de\\\_evidencia`), `ES\\\_CONTRINDICADO\\\_PARA`.
+    *   **3.3.** Desarrollar el servicio de procesamiento ("Processing Service") que lea desde PostgreSQL.
+    *   **3.4.** Implementar la lógica de extracción con LLM sobre el texto de las fichas para obtener:
+        *   a. La entidad (ej. "cefalea").
+        *   b. Un **score de confianza** sobre la extracción.
+        *   c. El texto original (contexto) como evidencia.
+    *   **3.5.** Implementar un **servicio de normalización** para mapear entidades extraídas a códigos **SNOMED CT** antes de insertarlas en el grafo.
+    *   **3.6.** Poblar el grafo con los nodos y las relaciones `TRATA` y `PROVOCA` extraídas automáticamente.
+    *   **3.7.** **(Crítico)** Desarrollar la herramienta web interna de curación para expertos con funcionalidades avanzadas:
+        *   a. **Flujo de "Sugerencia y Validación"** que pre-carga posibles remedios para agilizar la creación de relaciones `ALIVIA`.
+        *   b. **Trazabilidad de Evidencia**, mostrando el fragmento de texto original de donde se extrajo cada dato.
+        *   c. **Cola de Trabajo Priorizada** por el score de confianza del LLM, para que los expertos se enfoquen en los casos más ambiguos.
+        *   d. **Mecanismo de Feedback** que almacene las correcciones para futuros re-entrenamientos del modelo de extracción.
+    *   **Hito Clave:** Primera versión del Grafo de Conocimiento Clínico, normalizado, enriquecido y validado por expertos.
+
+#### **Fase 4: API y Aplicación Piloto (MVP) (Duración: 6-8 semanas)**
+*   **Objetivo:** Exponer el valor del grafo a través de una API potente y una aplicación de demostración.
+    *   **4.1.** Diseñar y desarrollar nuestra API REST (`ClinicalGraph.API`) que permita consultas complejas. Ej: `GET /api/medicamento/{cn}/sugerencias?frecuencia=muy\\\_frecuente\\\&tipo\\\_remedio=parafarmacia`.
+    *   **4.2.** Desarrollar una aplicación web piloto (MVP) que consuma nuestra API.
+    *   **4.3.** La aplicación permitirá buscar un medicamento y mostrará una lista de sus efectos adversos **ordenados por frecuencia**, y junto a cada uno, las soluciones propuestas **ordenadas por nivel de evidencia**.
+    *   **Hito Clave:** Un producto funcional (MVP) que demuestra el valor único del proyecto y puede ser usado para demos a potenciales clientes.
+
+### **5. Visión a Futuro: Escalado a la Nube (Post-MVP)**
+
+Una vez validado el MVP, el siguiente paso estratégico será migrar la infraestructura de un entorno local a una arquitectura cloud escalable (ej. en Azure o AWS). El objetivo es ofrecer el servicio como una plataforma SaaS (Software as a Service) a la que las farmacias y otros clientes podrán conectarse a través de:
+*   **Integración con Chatbots:** Proporcionando respuestas inteligentes y contextualizadas.
+*   **Integración en el Punto de Venta (TPV):** Ofreciendo sugerencias proactivas y relevantes durante la dispensación de medicamentos para facilitar la venta cruzada informada.
+
+### **6. Próximos Pasos Inmediatos**
+
+1.  **Acción 1:** Crear la solución (`.sln`) en Visual Studio con el proyecto de API Web.
+2.  **Acción 2:** Instalar PostgreSQL en el entorno de desarrollo local y crear la base de datos `cima\\\_staging\\\_db`.
+3.  **Acción 3:** Escribir el código C# para hacer una llamada exitosa al endpoint `GET maestras?maestra=3` y mostrar la lista de formas farmacéuticas por consola para validar la conexión.
+
+---
+
+Este roadmap ahora es un plan de acción mucho más completo y a prueba de futuro. Estoy listo para empezar cuando tú lo estés.
+
+
+
+
+¡Brutal el avance! 💥 Ya tienes la base sólida y limpia. Voy a darte mi **plan de juego** (sin código, como pediste) para convertir esto en el mejor buscador relacional + grafo + vector del mercado, pensando ya en el agente/chatbot.
+
+# Mi opinión y hoja de ruta (priorizada)
+
+## 1) Normalizar lo que más valor aporta (fase corta, impacto alto)
+
+**a) Principios activos (pactivos)**
+
+* **Entidad**: Sustancia (id, nombre normalizado, sinónimos).
+* **Relación**: Medicamento —\[CONTIENE]→ Sustancia (con propiedades: **fuerza**, **unidad**, **forma/vía** si aplica).
+* **Por qué primero**: habilita queries clínicas reales (“ibuprofeno + paracetamol”, “sin AAS”, etc.) y es el eje del grafo.
+
+**b) Excipientes (excipientes)**
+
+* **Entidad**: Excipient (id, nombre normalizado).
+* **Relación**: Medicamento —\[TIENE\_EXCIPIENTE]→ Excipient (flag **declaración obligatoria**, notas).
+* **Valor**: alertas de alergias/intolerancias (“sin lactosa”, “sin sacarosa”, “sin aceite de soja”). Diferenciador real.
+
+**c) ATC**
+
+* **Entidad**: ATC (código, nombre, **padre** para el árbol).
+* **Relación**: Medicamento —\[CLASIFICADO\_EN]→ ATC.
+* **Valor**: navegas terapéuticamente (“dame todos los AINEs”, “todos los N02C analgésicos antimigrañosos”). Además es un **eje jerárquico** perfecto para el grafo.
+
+**d) Estado/comercialización/fechas**
+
+* En tabla Medicamentos: **comerc**, **estado.aut** (fecha autorización), **estado.rev** (si viene), y **suspensiones** si existen.
+* **Valor**: filtras por “en comercialización”, “autorizado desde…”, etc., y generas indicadores.
+
+**e) Alertas rápidas**
+
+* Booleans: **conduc** (afecta conducción), **triangulo** (seguimiento adicional).
+* **Valor**: filtros y badges en UI al instante.
+
+**f) Documentos y fotos (metadatos)**
+
+* **Entidad**: Documento (tipo FT/P/IPE, url, fecha, hash si luego los cacheas).
+* **Relación**: Medicamento —\[TIENE\_DOC]→ Documento.
+* **Valor**: trazabilidad y **provenance** para el chatbot (“fuente: FT 70039 sección 4.2”).
+
+> Con solo esto ya tienes un \\\*\\\*buscador estructurado\\\*\\\* potentísimo y un \\\*\\\*grafo útil\\\*\\\* (Medicamento↔Sustancia↔ATC), listo para enriquecer recomendaciones y razonamiento del agente.
+
+---
+
+## 2) Diseño de grafo (qué nodos y aristas)
+
+**Nodos**:
+
+* Medicamento, Sustancia, Excipient, ATC (con jerarquía), Forma, Vía, Laboratorio (Titular/Comercializador), Documento.
+  **Aristas clave**:
+* Medicamento–CONTIENE→Sustancia (props: fuerza, unidad).
+* Medicamento–TIENE\_EXCIPIENTE→Excipient (props: obligado).
+* Medicamento–CLASIFICADO\_EN→ATC.
+* ATC–PADRE\_DE→ATC (jerarquía).
+* Medicamento–FORMA→Forma; Medicamento–VIA→Vía.
+* Medicamento–TITULAR→Laboratorio; –COMERCIALIZA→Laboratorio.
+* Medicamento–TIENE\_DOC→Documento.
+
+**Consultas típicas que esto resuelve como mantequilla**:
+
+* “Anti-inflamatorios **sin** lactosa y **vía oral**”
+* “Ibuprofeno + pseudoefedrina, **comercializados** hoy”
+* “Analgésicos con **triángulo negro**”
+* “Sustancias relacionadas a este ATC y sus medicamentos hijos del árbol”
+
+---
+
+## 3) Estrategia de vectores (RAG de verdad, no humo)
+
+**¿Qué vectorizamos?**
+
+* El **contenido semántico** de FT/P/IPE (SmPC): Indicaciones, posología (4.2), contraindicaciones (4.3), advertencias (4.4), interacciones (4.5), embarazo/lactancia (4.6), conducción (4.7), reacciones adversas (4.8).
+* **Chunking**: por sección y subtítulo; tamaño moderado con solape pequeño; **id de chunk** + **metadatos** (nregistro, sección, fecha doc).
+* **Index híbrido**:
+
+  * **Filtro estructural primero** (SQL/Graph): ATC, vía, forma, sustancia, flags (conduc/triángulo), comercialización…
+  * **Luego** vector search solo sobre los chunks candidatos (rápido y preciso).
+  * (Opcional) **re-ranker** textual para el top-k final.
+
+**Flujo del agente/chatbot**
+
+1. **Comprende intención + facetas** → traduce a **filtros estructurados** (SQL/grafo).
+2. **Recupera candidatos** (NRegistros).
+3. **RAG**: busca chunks vectoriales solo de esos candidatos.
+4. **Cita** siempre FT/P con sección/fecha (provenance).
+5. Si pregunta es puramente estructural (“sin lactosa”), puede responder **sin RAG**.
+
+**Ventaja competitiva**: precisión clínica + velocidad (menos ruido, chunks muy relevantes) + explicabilidad (citas exactas).
+
+---
+
+## 4) Calidad de datos (clave para “ser los mejores”)
+
+* **Normalización de nombres** (lowercase, tildes, guiones, formas salinas versus base) y **sinónimos** (p. ej., “ibuprofeno lisina” vs “ibuprofen lysine”).
+* **IDs estables**: usa los IDs que ya trae CIMA (cuando existan) para sustancias/excipientes/ATC; si no, genera internos pero mapea.
+* **Desambiguación de fuerzas**: guarda **cantidad** + **unidad** por sustancia (no solo cadena “200 mg”).
+* **ATC jerárquico**: asegúrate de cargar **toda la cadena** (A → A01 → A01A → A01AA → A01AA01…). Puedes hacerlo con un campo `parent\\\_code` o árbol.
+
+---
+
+## 5) Rendimiento / UX
+
+* Postgres: ya tienes trgm + tsvector; añade **materialized views** para facetas (por ATC, por sustancia, por excipiente) si hace falta.
+* Para grafo: si sigues en Postgres, podrías tirar con tablas N\:M; si quieres explotar queries de caminos, **Neo4j** te dará mucha agilidad.
+* Mantén `RawJson` íntegro para auditoría y **ETL incremental** desde `/registroCambios` refrescando las tablas normalizadas, relaciones y el índice vectorial.
+
+---
+
+## 6) Qué haría **inmediatamente** (próximos mini-pasos)
+
+1. **Principios activos** (esqueleto relacional + volcado desde RawJson) — *habilita AND/OR por sustancias*.
+2. **Excipientes** (con flag “declaración obligatoria”).
+3. **ATC** (con jerarquía).
+4. **Booleans y fechas** (comerc, aut, rev, conduc, triangulo) en Medicamentos.
+5. **Documentos** (metadatos) para provenance del chatbot.
+6. **Luego**: índice vectorial con los FT/P/IPE ya linkados.
+
+> Cuando me digas “OK, vamos con 1) Principios activos”, te paso \\\*\\\*solo el punto 1\\\*\\\*, lo ejecutas, me devuelves resultado, y seguimos con el 2. Cero prisas, cero volcado de info de golpe.
+
+---
+
+## 7) ¿Cuándo creamos los vectores?
+
+Después de 1–5 (sobre todo **Documentos**), porque el vector store debe guardar **metadatos** limpios (nregistro, tipo doc, sección, fecha). Así el agente puede:
+
+* filtrar por estructura → **RAG** sobre esos candidatos → citar sección exacta.
+* Y el índice vectorial se re-construye **incrementalmente** cuando cambien los docs (hash/fecha).
+
+---
+
+Si te parece bien esta ruta, dime: **“vamos con 1) Principios activos”** y te doy **únicamente** ese paso (sin nada más) para psql.
+
+
+
+
+
+
+El Plano Maestro Definitivo y Corregido (Versión Final)
+Revisada toda la conversación, el plan de juego que aprobamos y tu briefing, esta es la lista exhaustiva y COMPLETA de todo lo que necesitamos en nuestra base de datos.
+1. Tablas Maestras (Catálogos)
+✅ SustanciaActiva (Hecho)
+✅ FormaFarmaceutica (Hecho)
+✅ FormaFarmaceuticaSimplificada (Hecho)
+✅ Vtm (Hecho)
+✅ ViaAdministracion (Hecho)
+📋 Excipiente (Por hacer)
+📋 AliasExcipiente (Por hacer) - Tu idea, la mantenemos.
+📋 Atc (Por hacer) - Con CodigoPadre para la jerarquía.
+📋 Laboratorio (Por hacer)
+📋 Documento (Por hacer) - Para los metadatos de FT/Prospecto.
+2. Tablas de Relación (Conectores N:M)
+✅ MedicamentoSustancia (Hecho y enriquecido)
+✅ MedicamentoVia (Hecho)
+📋 MedicamentoExcipiente (Por hacer) - Con el importantísimo flag Obligatorio.
+📋 MedicamentoAtc (Por hacer)
+3. La Tabla Central: Medicamentos
+Aquí es donde se me han quedado cosas. Esta es la lista completa de columnas que debe tener la tabla Medicamentos al final del proceso.
+Columnas existentes (validadas):
+✅ Id (uuid)
+✅ NRegistro (varchar, UNIQUE)
+✅ Nombre (varchar)
+✅ Dosis (varchar)
+✅ Generico (boolean)
+✅ Receta (boolean)
+✅ RawJson (jsonb - para el resumen de lista)
+✅ CreatedAt (timestamptz)
+✅ UpdatedAt (timestamptz)
+Columnas de relación (FKs) y "Banderas de Alerta Rápida" (POR AÑADIR/COMPLETAR):
+Relaciones 1:N
+➕ LaboratorioTitularId (INT, FK a Laboratorio)
+➕ LaboratorioComercializadorId (INT, FK a Laboratorio)
+Estado / Comercialización / Fechas (Punto d del plan)
+➕ Comercializado (BOOLEAN) - para el flag comerc
+➕ FechaAutorizacion (TIMESTAMPTZ) - para estado.aut
+➕ FechaSuspension (TIMESTAMPTZ, nullable) - para estado.susp
+➕ FechaRevocacion (TIMESTAMPTZ, nullable) - para estado.rev
+¡¡Alertas Rápidas!! (Punto e del plan - el que me he dejado antes)
+➕ AfectaConduccion (BOOLEAN) - para el flag conduc
+➕ TrianguloNegro (BOOLEAN) - para el flag triangulo
+➕ Fotos (BOOLEAN) - para saber si tiene fotos disponibles
+➕ MaterialesInformativos (BOOLEAN) - para el flag materialesInf
+➕ Huerfano (BOOLEAN) - para el flag huerfano
+➕ Biosimilar (BOOLEAN) - para el flag biosimilar
+➕ Psum (BOOLEAN) - para el flag psum (Problema de Suministro)
+Enriquecimiento y Trazabilidad (como definimos)
+➕ RawJsonDetalle (JSONB)
+➕ EnrichedAt (TIMESTAMPTZ)
+
+
+
+Vale, ahora sí, pongamos la **visión SOTA**.
+Tú ya tienes la base sólida (medicamentos, diccionarios, relaciones clásicas). Lo siguiente es **levantar capas semánticas y clínicas** que hagan que tu grafo no sea solo una base de medicamentos, sino un **mapa farmacológico cognitivo** comparable a lo que usan hospitales de élite.
+
+Aquí te dejo las **tablas relacionales nuevas** que darán un salto diferencial:
+
+---
+
+### 1. **Indicaciones Terapéuticas**
+
+* **MedicamentoIndicacion** (NRegistro ↔ IndicaciónId, + tipo: principal/secundaria, aprobado/off-label, nivel de evidencia).
+* **Indicacion** (Id, Nombre, CIE-10/11, SNOMED-CT, Ontología propia).
+  👉 Valor: mapa claro de *para qué sirve* cada fármaco, alineado con estándares médicos.
+
+---
+
+### 2. **Efectos Adversos**
+
+* **MedicamentoEfectoAdverso** (NRegistro ↔ EfectoAdversoId, + severidad, frecuencia, secciones de origen).
+* **EfectoAdverso** (Id, Nombre normalizado, Códigos MedDRA/CTCAE).
+  👉 Valor: trazabilidad riesgo → fármaco; detectar patrones poblacionales o multi-fármaco.
+
+---
+
+### 3. **Interacciones Medicamentosas**
+
+* **InteraccionFarmacoFarmaco** (NRegistro1, NRegistro2, tipo: potenciación, antagonismo, toxicidad; nivel evidencia).
+* **InteraccionFarmacoAlimento** (NRegistro ↔ AlimentoId, + efecto: inhibición, potenciación, absorción reducida).
+* **Alimento/Nutriente** (Id, Nombre, categoría).
+  👉 Valor: grafo clínico avanzado (lo que usan los sistemas CDSS para alertar en hospitales).
+
+---
+
+### 4. **Poblaciones Especiales**
+
+* **MedicamentoPoblacion** (NRegistro ↔ PoblacionId, + notas de ajuste, riesgo, contraindicación).
+* **Poblacion** (Id, Nombre: embarazo, lactancia, pediatría, geriatría, insuficiencia renal/hepática).
+  👉 Valor: personalización clínica (lo que se acerca a la medicina de precisión).
+
+---
+
+### 5. **Posología y Ajustes**
+
+* **MedicamentoPosologia** (NRegistro, dosis mínima/máxima, frecuencia, vía, notas).
+* **MedicamentoAjuste** (NRegistro ↔ FactorAjusteId, + regla: ajuste por creatinina, genotipo, peso, etc.).
+* **FactorAjuste** (Id, Nombre, tipo: fisiológico/genético/farmacocinético).
+  👉 Valor: conecta farmacología con biomarcadores y condiciones individuales.
+
+---
+
+### 6. **Farmacogenómica / Biomarcadores**
+
+(ya tienes base con *MedicamentoBiomarcador*):
+
+* Expandir con **Relaciones indirectas**: biomarcador ↔ enfermedad ↔ respuesta.
+* Añadir **NivelEvidencia** y **Recomendación Clínica** (p. ej. CPIC guidelines).
+  👉 Valor: medicina de precisión real, diferencial frente a cualquier base estándar.
+
+---
+
+### 7. **Alertas de Seguridad**
+
+* **MedicamentoAlerta** (NRegistro ↔ AlertaId, + fuente: EMA, FDA, AEMPS; fecha inicio/fin).
+* **AlertaFarmacologica** (Id, tipo: retirada, black-box warning, lote afectado).
+  👉 Valor: capa dinámica de farmacovigilancia; súper valiosa para médicos/farmacéuticos.
+
+---
+
+### 8. **Combinaciones y Protocolos**
+
+* **MedicamentoProtocolo** (ProtocoloId ↔ Medicamento, rol: fármaco base / coadyuvante).
+* **Protocolo** (Id, Nombre: quimioterapia X, profilaxis Y).
+  👉 Valor: permite razonar a nivel de tratamientos completos, no solo fármacos aislados.
+
+---
+
+### 9. **Farmacoeconomía y Disponibilidad**
+
+* **MedicamentoPrecio** (NRegistro, fecha, presentación, precio, reembolso, genérico/referencia).
+* **MedicamentoDisponibilidad** (NRegistro, estado: comercializado/no disponible).
+  👉 Valor: capa estratégica para hospitales y gestores sanitarios.
+
+---
+
+🔑 **Resumen**:
+Con todo esto tendrás un **grafo vivo** con relaciones de:
+
+* **Qué trata** (indicaciones),
+* **Qué provoca** (efectos adversos, interacciones),
+* **En quién y cómo** (poblaciones, ajustes, posología, biomarcadores),
+* **Con qué contexto** (protocolos, seguridad, economía).
+
+👉 Esto ya es **nivel CDSS hospitalario premium**, y si lo unes a tu pipeline de prospectos + fichas técnicas, estarás adelantando al 95% de las soluciones comerciales globales.
+
+---
+
+¿Quieres que te arme un **diagrama conceptual del grafo final** con estas tablas añadidas para que veas la red completa?

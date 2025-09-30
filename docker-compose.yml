@@ -1,0 +1,14 @@
+services:
+  etl-prescripcion:
+    build:
+      context: ./etl/python
+      dockerfile: Dockerfile
+    volumes:
+      - "C:/Users/Victor/Desktop/FARMAI/Farmai.Api/bin/Debug/net8.0/_data/nomenclator/latest:/data:ro"
+    command: >
+      --xml /data/Prescripcion.xml
+      --dsn "host=host.docker.internal port=5433 dbname=farmai_db user=farmai_etl_user password=Iaforeverfree"
+      --table PrescripcionStaging_NUEVO
+      --batch 2000
+
+

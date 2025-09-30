@@ -5,6 +5,8 @@ namespace Farmai.Api.Services;
 
 public class CimaClient(HttpClient http) : ICimaClient
 {
+    private const string DefaultNomenclatorUrl = "https://cima.aemps.es/cima/publico/nomenclator/Prescripcion.xml";
+
     private static void EnsureHeaders(HttpClient h)
     {
         if (!h.DefaultRequestHeaders.Accept.Any())
@@ -16,7 +18,6 @@ public class CimaClient(HttpClient http) : ICimaClient
     public async Task<HttpTextResponse> GetMaestrasAsync(int maestra, CancellationToken ct = default)
     {
         EnsureHeaders(http);
-        // OJO: BaseAddress = https://cima.aemps.es/cima/rest/
         var res = await http.GetAsync($"maestras?maestra={maestra}", ct);
         var body = await res.Content.ReadAsStringAsync(ct);
         res.Content.Headers.TryGetValues("Content-Type", out var ctVals);
@@ -42,4 +43,28 @@ public class CimaClient(HttpClient http) : ICimaClient
         return new HttpTextResponse((int)res.StatusCode, ctVals?.FirstOrDefault(), body);
     }
 
+    public async Task<HttpTextResponse> GetRegistroCambiosAsync(string fecha, CancellationToken ct = default)
+    {
+        EnsureHeaders(http);
+        // CIMA acepta dd/MM/yyyy (ya lo probaste)
+        var res = await http.GetAsync($"registroCambios?fecha={Uri.EscapeDataString(fecha)}", ct);
+        var body = await res.Content.ReadAsStringAsync(ct);
+        res.Content.Headers.TryGetValues("Content-Type", out var ctVals);
+        return new HttpTextResponse((int)res.StatusCode, ctVals?.FirstOrDefault(), body);
+    }
+
+    public async Task<HttpTextResponse> GetNomenclatorXmlAsync(string? absoluteUrl = null, CancellationToken ct = default)
+    {
+        // Este endpoint suele estar fuera de /cima/rest/. Por eso usamos URL absoluta.
+        var url = string.IsNullOrWhiteSpace(absoluteUrl) ? DefaultNomenclatorUrl : absoluteUrl.Trim();
+
+        // Para XML forzamos Accept: text/xml
+        if (!http.DefaultRequestHeaders.Accept.Any(h => h.MediaType?.Contains("xml") == true))
+            http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("text/xml"));
+
+        var res = await http.GetAsync(url, ct);
+        var body = await res.Content.ReadAsStringAsync(ct);
+        res.Content.Headers.TryGetValues("Content-Type", out var ctVals);
+        return new HttpTextResponse((int)res.StatusCode, ctVals?.FirstOrDefault(), body);
+    }
 }
