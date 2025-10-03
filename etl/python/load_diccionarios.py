@@ -184,19 +184,23 @@ def load_principios_activos(xml_path, conn):
     ns = {'ns': 'http://schemas.aemps.es/prescripcion/aemps_prescripcion_principios_activos'}
     context = etree.iterparse(xml_path, tag='{http://schemas.aemps.es/prescripcion/aemps_prescripcion_principios_activos}principiosactivos', events=("end",))
     rows = []
+    atc_rows = []
     invalid = 0
     for _, pa in context:
         codigo = pa.findtext('ns:nroprincipioactivo', default=None, namespaces=ns)
         nombre = pa.findtext('ns:principioactivo', default=None, namespaces=ns)
-        lista = pa.findtext('ns:lista', default=None, namespaces=ns)
+        lista = pa.findtext('ns:listapsicotropo', default=None, namespaces=ns)
+        atc = pa.findtext('ns:codigoprincipioactivo', default=None, namespaces=ns)
         if not codigo or not nombre:
             print(f"[WARN] Entrada inválida: codigo={codigo}, nombre={nombre}", file=sys.stderr)
             invalid += 1
             pa.clear()
             continue
         rows.append((codigo, nombre.strip(), lista))
+        if atc:
+            atc_rows.append((codigo, atc))
         pa.clear()
-    print(f"[INFO] Filas válidas: {len(rows)}, inválidas: {invalid}", file=sys.stderr)
+    print(f"[INFO] Filas válidas: {len(rows)}, inválidas: {invalid}, ATC relaciones: {len(atc_rows)}", file=sys.stderr)
     with conn, conn.cursor() as cur:
         cur.execute('TRUNCATE "PrincipiosActivosXmlTemp";')
         cur.executemany(
@@ -206,14 +210,145 @@ def load_principios_activos(xml_path, conn):
             '"Nombre"=EXCLUDED."Nombre", "Lista"=EXCLUDED."Lista";',
             rows
         )
+        cur.execute('TRUNCATE "PrincipiosActivos";')
+        cur.executemany(
+            'INSERT INTO "PrincipiosActivos" ("Codigo","Nombre","Lista") '
+            'VALUES (%s,%s,%s) '
+            'ON CONFLICT ("Codigo") DO UPDATE SET '
+            '"Nombre"=EXCLUDED."Nombre", "Lista"=EXCLUDED."Lista";',
+            rows
+        )
+        cur.executemany(
+            'INSERT INTO graph_edge (src_type, src_key, rel, dst_type, dst_key, props) '
+            'VALUES (%s,%s,%s,%s,%s,%s) '
+            'ON CONFLICT (src_type, src_key, rel, dst_type, dst_key) DO NOTHING;',
+            [(src_type, src_key, rel, dst_type, dst_key, '{}') 
+             for src_type, src_key, rel, dst_type, dst_key in 
+             [('PrincipioActivo', codigo, 'PERTENECE_A_ATC', 'ATC', atc) for codigo, atc in atc_rows]]
+        )
     return len(rows)
+
+def load_excipientes(xml_path, conn):
+    from lxml import etree
+    d = etree.parse(str(xml_path))
+    rows = []
+    # Cada registro es <excipientes> o <excipiente>, con hijos namespaced.
+    for e in d.getroot().iter():
+        tag = e.tag.split('}')[-1].lower()
+        if tag not in ('excipiente', 'excipientes'):
+            continue
+        # Coger texto usando local-name() para ignorar namespaces
+        cod = (e.xpath('string(.//*[local-name()="codexcipiente"][1])') or
+               e.xpath('string(.//*[local-name()="codigoedo"][1])')).strip()
+        nom = (e.xpath('string(.//*[local-name()="nombre"][1])') or
+               e.xpath('string(.//*[local-name()="edo"][1])')).strip()
+        if cod and nom:
+            rows.append((cod, nom))
+    with conn, conn.cursor() as cur:
+        cur.execute('TRUNCATE "ExcipientesDeclObligDicStaging";')
+        cur.executemany(
+            'INSERT INTO "ExcipientesDeclObligDicStaging" ("CodExcipiente","Nombre") '
+            'VALUES (%s,%s) '
+            'ON CONFLICT ("CodExcipiente") DO UPDATE SET "Nombre"=EXCLUDED."Nombre";',
+            rows
+        )
+    print(f"[OK] Excipientes detectados: {len(rows)}")
+    return len(rows)
+
+# --- NUEVO ---
+def load_unidad_contenido(xml_path, conn):
+    from lxml import etree
+    d = etree.parse(str(xml_path))
+    rows = []
+    # admite dos variantes de esquema; filtramos solo nodos con ambos campos
+    for e in d.iter():
+        tag = e.tag.split('}')[-1].lower()
+        if tag not in ('unidadcontenido', 'unidadescontenido', 'item'):
+            continue
+        id_txt = (e.findtext('.//codigounidadcontenido') or '').strip()
+        nom    = (e.findtext('.//unidadcontenido')       or '').strip()
+        if id_txt.isdigit() and nom:
+            rows.append((int(id_txt), nom))
+    with conn, conn.cursor() as cur:
+        cur.executemany(
+            'INSERT INTO "UnidadContenidoDicStaging"("Id","Nombre") VALUES (%s,%s) '
+            'ON CONFLICT ("Id") DO UPDATE SET "Nombre"=EXCLUDED."Nombre";',
+            rows
+        )
+    return len(rows)
+
+
+
+def load_envases(xml_path, conn):
+    from lxml import etree
+    d = etree.parse(str(xml_path))
+    rows = []
+    for e in d.iter():
+        tag = e.tag.split('}')[-1].lower()
+        if tag not in ('envase','envases','item'):
+            continue
+        id_txt = (e.findtext('.//codigoenvase') or '').strip()
+        nom    = (e.findtext('.//envase')       or '').strip()
+        if id_txt.isdigit() and nom:
+            rows.append((int(id_txt), nom))
+    with conn, conn.cursor() as cur:
+        cur.executemany(
+            'INSERT INTO "EnvaseDicStaging"("Id","Nombre") VALUES (%s,%s) '
+            'ON CONFLICT ("Id") DO UPDATE SET "Nombre"=EXCLUDED."Nombre";',
+            rows
+        )
+    return len(rows)
+
+# --- NUEVO: DCP / DCPF / DCSA ----------------------------------------------
+def _load_cod_nombre_generic(xml_path, conn, table_staging, code_xp, name_xp, rec_tags):
+    from lxml import etree
+    d = etree.parse(str(xml_path))
+    rows = []
+    for e in d.iter():
+        tag = e.tag.split('}')[-1].lower()
+        if tag in rec_tags:
+            cod = (e.xpath(f'string(.//{code_xp})') or '').strip()
+            nom = (e.xpath(f'string(.//{name_xp})') or '').strip()
+            if cod and nom:
+                rows.append((cod, nom))
+    with conn, conn.cursor() as cur:
+        cur.executemany(
+            f'INSERT INTO "{table_staging}"("Codigo","Nombre") VALUES (%s,%s) '
+            f'ON CONFLICT ("Codigo") DO UPDATE SET "Nombre"=EXCLUDED."Nombre";',
+            rows
+        )
+    return len(rows)
+
+def load_dcp(xml_path, conn):
+    # Ajusta rec_tags y xpaths si tu XML usa otros nombres de elementos
+    return _load_cod_nombre_generic(xml_path, conn, "DcpDicStaging",
+        code_xp='*[local-name()="codigodcp"][1]',
+        name_xp='*[local-name()="dcp"][1]',
+        rec_tags={'dcp','dcps','item','denominacion','denominaciones'})
+
+def load_dcpf(xml_path, conn):
+    return _load_cod_nombre_generic(xml_path, conn, "DcpfDicStaging",
+        code_xp='*[local-name()="codigodcpf"][1]',
+        name_xp='*[local-name()="dcpf"][1]',
+        rec_tags={'dcpf','dcpfs','item','denominacion','denominaciones'})
+
+def load_dcsa(xml_path, conn):
+    return _load_cod_nombre_generic(xml_path, conn, "DcsaDicStaging",
+        code_xp='*[local-name()="codigodcsa"][1]',
+        name_xp='*[local-name()="dcsa"][1]',
+        rec_tags={'dcsa','dcsas','item','denominacion','denominaciones'})
+# ---------------------------------------------------------------------------
+
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dsn", required=True)
     ap.add_argument("--xml", required=True, help="Ruta al XML")
     ap.add_argument("--kind", required=True, choices=[
-        "laboratorios", "vias", "forma", "forma_simpl", "sitreg", "atc", "principios_activos"    ])
+      "laboratorios","vias","forma","forma_simpl","sitreg","atc",
+      "principios_activos","excipientes","unidad_contenido","envases", "dcp", "dcsa", "dcpf"
+    ])
+
     args = ap.parse_args()
     conn = psycopg2.connect(args.dsn); conn.autocommit = True
 
@@ -236,6 +371,20 @@ def main():
         n = load_atc(xmlp, conn); print(f"[OK] ATC cargados: {n}")
     elif args.kind == "principios_activos":
         n = load_principios_activos(xmlp, conn); print(f"[OK] Principios Activos cargados: {n}")
+    elif args.kind == 'excipientes':
+        n = load_excipientes(args.xml, conn); print(f"[OK] Excipientes cargados: {n}")
+    elif args.kind=="unidad_contenido":
+        n=load_unidad_contenido(xmlp, conn); print(f"[OK] UnidadContenido cargados: {n}")
+    elif args.kind=="envases":
+        n=load_envases(xmlp, conn); print(f"[OK] Envases cargados: {n}")
+    elif args.kind=="dcp":
+        n=load_dcp(xmlp, conn); print(f"[OK] DCP cargados: {n}")
+    elif args.kind=="dcpf":
+        n=load_dcpf(xmlp, conn); print(f"[OK] DCPF cargados: {n}")
+    elif args.kind=="dcsa":
+        n=load_dcsa(xmlp, conn); print(f"[OK] DCSA cargados: {n}")
+
+
     else:
         print("[ERROR] kind no soportado", file=sys.stderr); sys.exit(3)
 

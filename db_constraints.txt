@@ -1,0 +1,150 @@
+                table_name                 |               constraint_name                | contype |                                                                                  definition                                                                                  
+-------------------------------------------+----------------------------------------------+---------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ "__EFMigrationsHistory"                   | PK___EFMigrationsHistory                     | p       | PRIMARY KEY ("MigrationId")
+ "_EnvasesCsv"                             | _EnvasesCsv_pkey                             | p       | PRIMARY KEY ("Nombre")
+ "_UnidadContenidoCsv"                     | _UnidadContenidoCsv_pkey                     | p       | PRIMARY KEY ("Codigo")
+ "AliasBiomarcador"                        | AliasBiomarcador_BiomarcadorId_fkey          | f       | FOREIGN KEY ("BiomarcadorId") REFERENCES "Biomarcador"("Id") ON DELETE CASCADE
+ "AliasBiomarcador"                        | FK_AliasBiomarcador_Biomarcador_Id           | f       | FOREIGN KEY ("BiomarcadorId") REFERENCES "Biomarcador"("Id") ON UPDATE CASCADE ON DELETE CASCADE
+ "AliasBiomarcador"                        | AliasBiomarcador_pkey                        | p       | PRIMARY KEY ("Alias")
+ "AliasExcipiente"                         | FK_Alias_Excipiente                          | f       | FOREIGN KEY ("ExcipienteId") REFERENCES "Excipiente"("Id") ON DELETE CASCADE
+ "AliasExcipiente"                         | FK_AliasExcipiente_Excipiente_Id             | f       | FOREIGN KEY ("ExcipienteId") REFERENCES "Excipiente"("Id") ON UPDATE CASCADE ON DELETE CASCADE
+ "AliasExcipiente"                         | AliasExcipiente_pkey                         | p       | PRIMARY KEY ("Alias")
+ "AliasExcipiente"                         | UX_AliasExcipiente_AliasCanon                | u       | UNIQUE ("AliasCanon")
+ "AliasSustancia"                          | AliasSustancia_pkey                          | p       | PRIMARY KEY ("Alias")
+ "Atc"                                     | CK_Atc_Nivel_1_5                             | c       | CHECK ((("Nivel" >= 1) AND ("Nivel" <= 5)))
+ "Atc"                                     | Atc_pkey                                     | p       | PRIMARY KEY ("Codigo")
+ "AtcDicStaging"                           | AtcDicStaging_pkey                           | p       | PRIMARY KEY ("Codigo")
+ "AtcXmlTemp"                              | AtcXmlTemp_pkey                              | p       | PRIMARY KEY ("Codigo")
+ "Biomarcador"                             | Biomarcador_Tipo_check                       | c       | CHECK (("Tipo" = ANY (ARRAY['gen'::text, 'proteina'::text, 'mutacion'::text, 'expresion'::text, 'metabolito'::text, 'otro'::text])))
+ "Biomarcador"                             | Biomarcador_pkey                             | p       | PRIMARY KEY ("Id")
+ "BiomarcadorExtractStaging"               | BiomarcadorExtractStaging_pkey               | p       | PRIMARY KEY ("NRegistro", "BiomarcadorRaw", "TipoRelacion")
+ "DcpDicStaging"                           | FK_Dcp_Dcsa                                  | f       | FOREIGN KEY ("CodigoDcsa") REFERENCES "DcsaDicStaging"("CodigoDcsa") ON UPDATE CASCADE ON DELETE RESTRICT
+ "DcpDicStaging"                           | DcpDicStaging_pkey                           | p       | PRIMARY KEY ("CodigoDcp")
+ "DcpfDicStaging"                          | FK_Dcpf_Dcp                                  | f       | FOREIGN KEY ("CodigoDcp") REFERENCES "DcpDicStaging"("CodigoDcp") ON UPDATE CASCADE ON DELETE RESTRICT
+ "DcpfDicStaging"                          | DcpfDicStaging_pkey                          | p       | PRIMARY KEY ("CodigoDcpf")
+ "DcsaDicStaging"                          | DcsaDicStaging_pkey                          | p       | PRIMARY KEY ("CodigoDcsa")
+ "DictExcipienteOblig"                     | DictExcipienteOblig_pkey                     | p       | PRIMARY KEY ("Id")
+ "DictPrincipioActivo"                     | DictPrincipioActivo_pkey                     | p       | PRIMARY KEY ("Id")
+ "DictPrincipioActivo"                     | DictPrincipioActivo_Codigo_key               | u       | UNIQUE ("Codigo")
+ "Documento"                               | fk_documento_nregistro                       | f       | FOREIGN KEY ("NRegistro") REFERENCES "Medicamentos"("NRegistro") ON DELETE CASCADE
+ "Documento"                               | Documento_pkey                               | p       | PRIMARY KEY ("Id")
+ "EnvaseDicStaging"                        | EnvaseDicStaging_pkey                        | p       | PRIMARY KEY ("Id")
+ "Excipiente"                              | CK_Excipiente_Nombre_NotBlank                | c       | CHECK ((btrim(("Nombre")::text) <> ''::text))
+ "Excipiente"                              | Excipiente_pkey                              | p       | PRIMARY KEY ("Id")
+ "ExcipientesDeclObligDicStaging"          | ExcipientesDeclObligDicStaging_pkey          | p       | PRIMARY KEY ("CodExcipiente")
+ "FormaFarmaceutica"                       | FormaFarmaceutica_pkey                       | p       | PRIMARY KEY ("Id")
+ "FormaFarmaceuticaDicStaging"             | FormaFarmaceuticaDicStaging_pkey             | p       | PRIMARY KEY ("Id")
+ "FormaFarmaceuticaMap"                    | FormaFarmaceuticaMap_pkey                    | p       | PRIMARY KEY ("IdJson")
+ "FormaFarmaceuticaSimplificada"           | FormaFarmaceuticaSimplificada_pkey           | p       | PRIMARY KEY ("Id")
+ "FormaFarmaceuticaSimplificadaDicStaging" | FormaFarmaceuticaSimplificadaDicStaging_pkey | p       | PRIMARY KEY ("Id")
+ "FormaFarmaceuticaSimplMap"               | FormaFarmaceuticaSimplMap_pkey               | p       | PRIMARY KEY ("IdJson")
+ "Foto"                                    | fk_foto_nregistro                            | f       | FOREIGN KEY ("NRegistro") REFERENCES "Medicamentos"("NRegistro") ON DELETE CASCADE
+ "Foto"                                    | Foto_pkey                                    | p       | PRIMARY KEY ("Id")
+ "Foto"                                    | Foto_NReg_Orden_key                          | u       | UNIQUE ("NRegistro", "Orden")
+ "LabGrupoCif"                             | LabGrupoCif_LabId_fkey                       | f       | FOREIGN KEY ("LabId") REFERENCES "Laboratorio"("Id") ON DELETE CASCADE
+ "LabGrupoCif"                             | FK_LabGrupoCif_CifCanon                      | f       | FOREIGN KEY ("CifCanon") REFERENCES "LabGrupoCifCanon"("CifCanon") ON UPDATE CASCADE ON DELETE RESTRICT
+ "LabGrupoCif"                             | FK_LabGrupoCif_Lab_Id                        | f       | FOREIGN KEY ("LabId") REFERENCES "Laboratorio"("Id") ON UPDATE CASCADE ON DELETE CASCADE
+ "LabGrupoCif"                             | LabGrupoCif_pkey                             | p       | PRIMARY KEY ("GrupoId")
+ "LabGrupoCifCanon"                        | LabGrupoCifCanon_SugeridoLabId_fkey          | f       | FOREIGN KEY ("SugeridoLabId") REFERENCES "Laboratorio"("Id") ON DELETE RESTRICT
+ "LabGrupoCifCanon"                        | LabGrupoCifCanon_pkey                        | p       | PRIMARY KEY ("CifCanon")
+ "LabGrupoCifOverride"                     | FK_LabGrupoCifOverride_CifCanon              | f       | FOREIGN KEY ("CifCanon") REFERENCES "LabGrupoCifCanon"("CifCanon") ON UPDATE CASCADE ON DELETE CASCADE
+ "LabGrupoCifOverride"                     | LabGrupoCifOverride_LabId_fkey               | f       | FOREIGN KEY ("LabId") REFERENCES "Laboratorio"("Id") ON DELETE RESTRICT
+ "LabGrupoCifOverride"                     | LabGrupoCifOverride_pkey                     | p       | PRIMARY KEY ("CifCanon")
+ "Laboratorio"                             | Laboratorio_pkey                             | p       | PRIMARY KEY ("Id")
+ "Laboratorio"                             | UX_Laboratorio_NombreCanon                   | u       | UNIQUE ("NombreCanon")
+ "LaboratorioCodigoAemps"                  | LaboratorioCodigoAemps_LabId_fkey            | f       | FOREIGN KEY ("LabId") REFERENCES "Laboratorio"("Id") ON DELETE CASCADE
+ "LaboratorioCodigoAemps"                  | LaboratorioCodigoAemps_pkey                  | p       | PRIMARY KEY ("Codigo")
+ "LaboratorioDicStaging"                   | LaboratorioDicStaging_pkey                   | p       | PRIMARY KEY ("Codigo")
+ "LaboratorioInfo"                         | LaboratorioInfo_LabId_fkey                   | f       | FOREIGN KEY ("LabId") REFERENCES "Laboratorio"("Id") ON DELETE CASCADE
+ "LaboratorioInfo"                         | LaboratorioInfo_pkey                         | p       | PRIMARY KEY ("LabId")
+ "LaboratoriosDicStaging"                  | LaboratoriosDicStaging_pkey                  | p       | PRIMARY KEY ("Codigo")
+ "MedicamentoAtc"                          | FK_MedAtc_Atc_Codigo                         | f       | FOREIGN KEY ("Codigo") REFERENCES "Atc"("Codigo") ON UPDATE CASCADE ON DELETE RESTRICT
+ "MedicamentoAtc"                          | MedicamentoAtc_Codigo_fkey                   | f       | FOREIGN KEY ("Codigo") REFERENCES "Atc"("Codigo") ON DELETE RESTRICT
+ "MedicamentoAtc"                          | FK_MedAtc_Meds_NRegistro                     | f       | FOREIGN KEY ("NRegistro") REFERENCES "Medicamentos"("NRegistro") ON UPDATE CASCADE ON DELETE CASCADE
+ "MedicamentoAtc"                          | MedicamentoAtc_NRegistro_fkey                | f       | FOREIGN KEY ("NRegistro") REFERENCES "Medicamentos"("NRegistro") ON DELETE CASCADE
+ "MedicamentoAtc"                          | MedicamentoAtc_pkey                          | p       | PRIMARY KEY ("NRegistro", "Codigo")
+ "MedicamentoBiomarcador"                  | MedicamentoBiomarcador_NivelEvidencia_check  | c       | CHECK ((("NivelEvidencia" >= 1) AND ("NivelEvidencia" <= 5)))
+ "MedicamentoBiomarcador"                  | MedicamentoBiomarcador_TipoRelacion_check    | c       | CHECK (("TipoRelacion" = ANY (ARRAY['predice_respuesta'::text, 'predice_toxicidad'::text, 'contraindicado'::text, 'ajuste_dosis'::text, 'indicacion'::text, 'otro'::text])))
+ "MedicamentoBiomarcador"                  | FK_MedBio_Biomarcador_Id                     | f       | FOREIGN KEY ("BiomarcadorId") REFERENCES "Biomarcador"("Id") ON UPDATE CASCADE ON DELETE RESTRICT
+ "MedicamentoBiomarcador"                  | FK_MedBio_Meds_NRegistro                     | f       | FOREIGN KEY ("NRegistro") REFERENCES "Medicamentos"("NRegistro") ON UPDATE CASCADE ON DELETE CASCADE
+ "MedicamentoBiomarcador"                  | MedicamentoBiomarcador_BiomarcadorId_fkey    | f       | FOREIGN KEY ("BiomarcadorId") REFERENCES "Biomarcador"("Id") ON DELETE RESTRICT
+ "MedicamentoBiomarcador"                  | MedicamentoBiomarcador_NRegistro_fkey        | f       | FOREIGN KEY ("NRegistro") REFERENCES "Medicamentos"("NRegistro") ON DELETE CASCADE
+ "MedicamentoBiomarcador"                  | MedicamentoBiomarcador_pkey                  | p       | PRIMARY KEY ("NRegistro", "BiomarcadorId", "TipoRelacion")
+ "MedicamentoDetalleNotFound"              | MedicamentoDetalleNotFound_pkey              | p       | PRIMARY KEY ("NRegistro")
+ "MedicamentoDetalleRaw"                   | MedicamentoDetalleRaw_pkey                   | p       | PRIMARY KEY ("NRegistro")
+ "MedicamentoDetalleStaging"               | MedicamentoDetalleStaging_pkey               | p       | PRIMARY KEY ("NRegistro")
+ "MedicamentoExcipiente"                   | FK_MedExc_Excipiente_Id                      | f       | FOREIGN KEY ("ExcipienteId") REFERENCES "Excipiente"("Id") ON UPDATE CASCADE ON DELETE RESTRICT
+ "MedicamentoExcipiente"                   | MedicamentoExcipiente_NRegistro_fkey         | f       | FOREIGN KEY ("NRegistro") REFERENCES "Medicamentos"("NRegistro") ON DELETE CASCADE
+ "MedicamentoExcipiente"                   | MedicamentoExcipiente_ExcipienteId_fkey      | f       | FOREIGN KEY ("ExcipienteId") REFERENCES "Excipiente"("Id") ON DELETE RESTRICT
+ "MedicamentoExcipiente"                   | FK_MedExc_Meds_NRegistro                     | f       | FOREIGN KEY ("NRegistro") REFERENCES "Medicamentos"("NRegistro") ON UPDATE CASCADE ON DELETE CASCADE
+ "MedicamentoExcipiente"                   | MedicamentoExcipiente_pkey                   | p       | PRIMARY KEY ("NRegistro", "ExcipienteId", "Orden")
+ "MedicamentoPresentacion"                 | MedicamentoPresentacion_CN_fkey              | f       | FOREIGN KEY ("CN") REFERENCES "Presentacion"("CN") ON DELETE RESTRICT
+ "MedicamentoPresentacion"                 | FK_MedPres_Meds_NRegistro                    | f       | FOREIGN KEY ("NRegistro") REFERENCES "Medicamentos"("NRegistro") ON UPDATE CASCADE ON DELETE CASCADE
+ "MedicamentoPresentacion"                 | MedicamentoPresentacion_NRegistro_fkey       | f       | FOREIGN KEY ("NRegistro") REFERENCES "Medicamentos"("NRegistro") ON DELETE CASCADE
+ "MedicamentoPresentacion"                 | FK_MedPres_Presentacion_CN                   | f       | FOREIGN KEY ("CN") REFERENCES "Presentacion"("CN") ON UPDATE CASCADE ON DELETE RESTRICT
+ "MedicamentoPresentacion"                 | MedicamentoPresentacion_pkey                 | p       | PRIMARY KEY ("NRegistro", "CN")
+ "MedicamentoPresentacion"                 | uq_mp_cn_nreg                                | u       | UNIQUE ("CN", "NRegistro")
+ "Medicamentos"                            | CK_Medicamentos_RawJsonDetalle_Object        | c       | CHECK ((("RawJsonDetalle" IS NULL) OR (jsonb_typeof("RawJsonDetalle") = 'object'::text)))
+ "Medicamentos"                            | FK_Meds_FormaFarmaceutica_Id                 | f       | FOREIGN KEY ("FormaFarmaceuticaId") REFERENCES "FormaFarmaceutica"("Id") ON UPDATE CASCADE ON DELETE RESTRICT
+ "Medicamentos"                            | fk_meds_forma                                | f       | FOREIGN KEY ("FormaFarmaceuticaId") REFERENCES "FormaFarmaceutica"("Id") ON DELETE RESTRICT
+ "Medicamentos"                            | fk_meds_forma_simpl                          | f       | FOREIGN KEY ("FormaFarmaceuticaSimplificadaId") REFERENCES "FormaFarmaceuticaSimplificada"("Id") ON DELETE RESTRICT
+ "Medicamentos"                            | fk_meds_vtm                                  | f       | FOREIGN KEY ("VtmId") REFERENCES "Vtm"("Id") ON DELETE RESTRICT
+ "Medicamentos"                            | fk_meds_forma_simple                         | f       | FOREIGN KEY ("FormaFarmaceuticaSimplificadaId") REFERENCES "FormaFarmaceuticaSimplificada"("Id") ON DELETE RESTRICT
+ "Medicamentos"                            | FK_Med_LabTitular                            | f       | FOREIGN KEY ("LaboratorioTitularId") REFERENCES "Laboratorio"("Id")
+ "Medicamentos"                            | FK_Med_LabComercializador                    | f       | FOREIGN KEY ("LaboratorioComercializadorId") REFERENCES "Laboratorio"("Id")
+ "Medicamentos"                            | FK_Meds_LabTitular                           | f       | FOREIGN KEY ("LaboratorioTitularId") REFERENCES "Laboratorio"("Id") ON UPDATE RESTRICT ON DELETE RESTRICT
+ "Medicamentos"                            | FK_Meds_LabComercializador                   | f       | FOREIGN KEY ("LaboratorioComercializadorId") REFERENCES "Laboratorio"("Id") ON UPDATE RESTRICT ON DELETE RESTRICT
+ "Medicamentos"                            | FK_Meds_Vtm_Id                               | f       | FOREIGN KEY ("VtmId") REFERENCES "Vtm"("Id") ON UPDATE CASCADE ON DELETE RESTRICT
+ "Medicamentos"                            | FK_Meds_FormaFarmaceuticaSimplificada_Id     | f       | FOREIGN KEY ("FormaFarmaceuticaSimplificadaId") REFERENCES "FormaFarmaceuticaSimplificada"("Id") ON UPDATE CASCADE ON DELETE RESTRICT
+ "Medicamentos"                            | FK_Meds_LabTitular_Id                        | f       | FOREIGN KEY ("LaboratorioTitularId") REFERENCES "Laboratorio"("Id") ON UPDATE CASCADE ON DELETE RESTRICT
+ "Medicamentos"                            | FK_Meds_LabComercializador_Id                | f       | FOREIGN KEY ("LaboratorioComercializadorId") REFERENCES "Laboratorio"("Id") ON UPDATE CASCADE ON DELETE RESTRICT
+ "Medicamentos"                            | PK_Medicamentos                              | p       | PRIMARY KEY ("Id")
+ "MedicamentoSustancia"                    | FK_MedSust_SustanciaActiva_Id                | f       | FOREIGN KEY ("SustanciaId") REFERENCES "SustanciaActiva"("Id") ON UPDATE CASCADE ON DELETE RESTRICT
+ "MedicamentoSustancia"                    | MedicamentoSustancia_SustanciaId_fkey        | f       | FOREIGN KEY ("SustanciaId") REFERENCES "SustanciaActiva"("Id") ON DELETE RESTRICT
+ "MedicamentoSustancia"                    | FK_MedSust_Meds_NRegistro                    | f       | FOREIGN KEY ("NRegistro") REFERENCES "Medicamentos"("NRegistro") ON UPDATE CASCADE ON DELETE CASCADE
+ "MedicamentoSustancia"                    | fk_ms_nregistro                              | f       | FOREIGN KEY ("NRegistro") REFERENCES "Medicamentos"("NRegistro") ON DELETE CASCADE
+ "MedicamentoSustancia"                    | MedicamentoSustancia_pkey                    | p       | PRIMARY KEY ("NRegistro", "SustanciaId")
+ "MedicamentoVia"                          | FK_MedVia_ViaAdministracion_Id               | f       | FOREIGN KEY ("ViaId") REFERENCES "ViaAdministracion"("Id") ON UPDATE CASCADE ON DELETE RESTRICT
+ "MedicamentoVia"                          | FK_MedVia_Meds_NRegistro                     | f       | FOREIGN KEY ("NRegistro") REFERENCES "Medicamentos"("NRegistro") ON UPDATE CASCADE ON DELETE CASCADE
+ "MedicamentoVia"                          | fk_mv_nregistro                              | f       | FOREIGN KEY ("NRegistro") REFERENCES "Medicamentos"("NRegistro") ON DELETE CASCADE
+ "MedicamentoVia"                          | MedicamentoVia_ViaId_fkey                    | f       | FOREIGN KEY ("ViaId") REFERENCES "ViaAdministracion"("Id") ON DELETE RESTRICT
+ "MedicamentoVia"                          | MedicamentoVia_pkey                          | p       | PRIMARY KEY ("NRegistro", "ViaId")
+ "MedicamentoViaOverrides"                 | ux_mv_over                                   | u       | UNIQUE ("NRegistro", "ViaId")
+ "Outbox"                                  | Outbox_pkey                                  | p       | PRIMARY KEY ("Id")
+ "PrescripcionDelta"                       | PrescripcionDelta_SyncRunId_fkey             | f       | FOREIGN KEY ("SyncRunId") REFERENCES "SyncRun"("Id") ON DELETE CASCADE
+ "PrescripcionStaging"                     | FK_Presc_CodSitReg_Dic                       | f       | FOREIGN KEY ("CodSitReg") REFERENCES "SituacionRegistroDicStaging"("Codigo")
+ "PrescripcionStaging"                     | FK_Presc_CodSitRegPresen_Dic                 | f       | FOREIGN KEY ("CodSitRegPresen") REFERENCES "SituacionRegistroDicStaging"("Codigo")
+ "PrescripcionStaging"                     | PrescripcionStaging_pkey                     | p       | PRIMARY KEY ("CodNacion")
+ "PrescripcionStaging_NUEVA"               | PK_PrescNueva_CodNacion                      | p       | PRIMARY KEY ("CodNacion")
+ "PrescripcionStaging_NUEVO"               | PrescripcionStaging_NUEVO_pkey               | p       | PRIMARY KEY ("CodNacion")
+ "Presentacion"                            | Presentacion_pkey                            | p       | PRIMARY KEY ("CN")
+ "PresentacionContenido"                   | FK_PresCont_Presentacion_CN                  | f       | FOREIGN KEY ("CN") REFERENCES "Presentacion"("CN") ON UPDATE CASCADE ON DELETE RESTRICT
+ "PresentacionContenido"                   | PresentacionContenido_CN_fkey                | f       | FOREIGN KEY ("CN") REFERENCES "Presentacion"("CN") ON DELETE CASCADE
+ "PresentacionContenido"                   | PresentacionContenido_pkey                   | p       | PRIMARY KEY ("CN", "Secuencia")
+ "PresentacionContenidoStaging"            | FK_PresContStaging_EnvaseDic                 | f       | FOREIGN KEY ("EnvaseId") REFERENCES "EnvaseDicStaging"("Id")
+ "PresentacionContenidoStaging"            | FK_PresContStaging_UnidadDic                 | f       | FOREIGN KEY ("UnidadId") REFERENCES "UnidadContenidoDicStaging"("Id")
+ "PresentacionContenidoStaging"            | PresentacionContenidoStaging_pkey            | p       | PRIMARY KEY ("CN", "Secuencia")
+ "PrincipioActivoStaging"                  | PrincipioActivoStaging_pkey                  | p       | PRIMARY KEY ("NRegistro", "Orden")
+ "PrincipiosActivos"                       | PrincipiosActivos_pkey                       | p       | PRIMARY KEY ("Codigo")
+ "PrincipiosActivosXmlTemp"                | PrincipiosActivosXmlTemp_pkey                | p       | PRIMARY KEY ("Codigo")
+ "SituacionRegistroDicStaging"             | SituacionRegistroDicStaging_pkey             | p       | PRIMARY KEY ("Codigo")
+ "SustanciaActiva"                         | SustanciaActiva_pkey                         | p       | PRIMARY KEY ("Id")
+ "SustanciaActivaDicStaging"               | SustanciaActivaDicStaging_pkey               | p       | PRIMARY KEY ("Id")
+ "SyncRun"                                 | SyncRun_Kind_check                           | c       | CHECK (("Kind" = ANY (ARRAY['daily'::text, 'monthly'::text, 'backfill'::text, 'dicts'::text])))
+ "SyncRun"                                 | SyncRun_pkey                                 | p       | PRIMARY KEY ("Id")
+ "UnidadContenidoDicStaging"               | UnidadContenidoDicStaging_pkey               | p       | PRIMARY KEY ("Id")
+ "ViaAdministracion"                       | ViaAdministracion_pkey                       | p       | PRIMARY KEY ("Id")
+ "ViaAdministracionDicStaging"             | ViaAdministracionDicStaging_pkey             | p       | PRIMARY KEY ("Id")
+ "ViaAdministracionMap"                    | ViaAdministracionMap_pkey                    | p       | PRIMARY KEY ("IdCima")
+ "Vtm"                                     | Vtm_pkey                                     | p       | PRIMARY KEY ("Id")
+ "VtmDicStaging"                           | VtmDicStaging_pkey                           | p       | PRIMARY KEY ("Id")
+ excip_dic_map                             | excip_dic_map_excipiente_id_fkey             | f       | FOREIGN KEY (excipiente_id) REFERENCES "Excipiente"("Id") ON DELETE RESTRICT
+ excip_dic_map                             | excip_dic_map_pkey                           | p       | PRIMARY KEY (cod, excipiente_id)
+ graph_edge                                | graph_edge_dst_type_dst_key_fkey             | f       | FOREIGN KEY (dst_type, dst_key) REFERENCES graph_node(node_type, node_key) ON DELETE CASCADE
+ graph_edge                                | graph_edge_src_type_src_key_fkey             | f       | FOREIGN KEY (src_type, src_key) REFERENCES graph_node(node_type, node_key) ON DELETE CASCADE
+ graph_edge                                | graph_edge_pkey                              | p       | PRIMARY KEY (src_type, src_key, rel, dst_type, dst_key)
+ graph_node                                | graph_node_pkey                              | p       | PRIMARY KEY (node_type, node_key)
+ med_quarantine                            | med_quarantine_pkey                          | p       | PRIMARY KEY (nregistro)
+ pa_unmatched_map                          | pa_unmatched_map_pkey                        | p       | PRIMARY KEY (codigo_json)
+(146 rows)
+

@@ -1,0 +1,563 @@
+               table_name                |           column_name           |        data_type         | character_maximum_length | is_nullable |              column_default               
+-----------------------------------------+---------------------------------+--------------------------+--------------------------+-------------+-------------------------------------------
+ AliasExcipiente                         | Alias                           | text                     |                          | NO          | 
+ AliasExcipiente                         | ExcipienteId                    | integer                  |                          | YES         | 
+ AliasExcipiente                         | AliasCanon                      | character varying        |                      256 | YES         | 
+ AliasSustancia                          | Alias                           | text                     |                          | NO          | 
+ AliasSustancia                          | Canon                           | text                     |                          | NO          | 
+ Atc                                     | Codigo                          | character varying        |                       16 | NO          | 
+ Atc                                     | Nombre                          | character varying        |                      256 | NO          | 
+ Atc                                     | Nivel                           | smallint                 |                          | NO          | 
+ Atc                                     | CodigoPadre                     | character varying        |                       16 | YES         | 
+ AtcDicStaging                           | Codigo                          | character varying        |                       16 | NO          | 
+ AtcDicStaging                           | Nombre                          | character varying        |                      256 | NO          | 
+ AtcDicStaging                           | Nivel                           | smallint                 |                          | NO          | 
+ AtcDicStaging                           | CodigoPadre                     | character varying        |                       16 | YES         | 
+ AtcDicStaging                           | NombreCanon                     | character varying        |                      256 | YES         | 
+ AtcXmlTemp                              | Codigo                          | text                     |                          | NO          | 
+ AtcXmlTemp                              | Nombre                          | text                     |                          | YES         | 
+ AtcXmlTemp                              | Nivel                           | smallint                 |                          | YES         | 
+ AtcXmlTemp                              | CodigoPadre                     | text                     |                          | YES         | 
+ DcpDicStaging                           | CodigoDcp                       | character varying        |                       16 | NO          | 
+ DcpDicStaging                           | Nombre                          | text                     |                          | NO          | 
+ DcpDicStaging                           | CodigoDcsa                      | character varying        |                       16 | YES         | 
+ DcpDicStaging                           | NombreCanon                     | character varying        |                      256 | YES         | 
+ DcpfDicStaging                          | CodigoDcpf                      | character varying        |                       16 | NO          | 
+ DcpfDicStaging                          | Nombre                          | text                     |                          | NO          | 
+ DcpfDicStaging                          | CodigoDcp                       | character varying        |                       16 | NO          | 
+ DcpfDicStaging                          | NombreCanon                     | character varying        |                      256 | YES         | 
+ DcsaDicStaging                          | CodigoDcsa                      | character varying        |                       16 | NO          | 
+ DcsaDicStaging                          | Nombre                          | text                     |                          | NO          | 
+ DcsaDicStaging                          | NombreCanon                     | character varying        |                      256 | YES         | 
+ DictExcipienteOblig                     | Id                              | integer                  |                          | NO          | 
+ DictExcipienteOblig                     | Nombre                          | text                     |                          | NO          | 
+ DictPrincipioActivo                     | Id                              | integer                  |                          | NO          | 
+ DictPrincipioActivo                     | Codigo                          | text                     |                          | NO          | 
+ DictPrincipioActivo                     | Nombre                          | text                     |                          | NO          | 
+ Documento                               | Id                              | bigint                   |                          | NO          | nextval('"Documento_Id_seq"'::regclass)
+ Documento                               | NRegistro                       | character varying        |                       32 | NO          | 
+ Documento                               | Tipo                            | smallint                 |                          | NO          | 
+ Documento                               | Secc                            | boolean                  |                          | YES         | 
+ Documento                               | UrlHtml                         | text                     |                          | YES         | 
+ Documento                               | FechaRaw                        | bigint                   |                          | YES         | 
+ Documento                               | Fecha                           | timestamp with time zone |                          | YES         | 
+ Documento                               | UrlPdf                          | text                     |                          | YES         | 
+ Documento                               | FechaDoc                        | timestamp with time zone |                          | YES         | 
+ EnvaseDicStaging                        | Id                              | integer                  |                          | NO          | 
+ EnvaseDicStaging                        | Nombre                          | text                     |                          | NO          | 
+ EnvaseDicStaging                        | NombreCanon                     | character varying        |                      256 | YES         | 
+ Excipiente                              | Id                              | bigint                   |                          | NO          | 
+ Excipiente                              | Nombre                          | character varying        |                      256 | NO          | 
+ ExcipientesDeclObligDicStaging          | CodExcipiente                   | text                     |                          | NO          | 
+ ExcipientesDeclObligDicStaging          | Nombre                          | text                     |                          | YES         | 
+ FormaCanonRaw                           | nombre_forma                    | text                     |                          | YES         | 
+ FormaCanonRaw                           | nombre_forma_simpl              | text                     |                          | YES         | 
+ FormaFarmaceutica                       | Id                              | integer                  |                          | NO          | 
+ FormaFarmaceutica                       | Nombre                          | character varying        |                      256 | NO          | 
+ FormaFarmaceutica                       | NombreCanon                     | character varying        |                      256 | YES         | 
+ FormaFarmaceuticaDicStaging             | Id                              | integer                  |                          | NO          | 
+ FormaFarmaceuticaDicStaging             | Nombre                          | text                     |                          | NO          | 
+ FormaFarmaceuticaDicStaging             | NombreCanon                     | character varying        |                      256 | YES         | 
+ FormaFarmaceuticaMap                    | IdJson                          | integer                  |                          | NO          | 
+ FormaFarmaceuticaMap                    | IdDic                           | integer                  |                          | YES         | 
+ FormaFarmaceuticaMap                    | NombreCanon                     | text                     |                          | YES         | 
+ FormaFarmaceuticaSimplMap               | IdJson                          | integer                  |                          | NO          | 
+ FormaFarmaceuticaSimplMap               | IdDic                           | integer                  |                          | YES         | 
+ FormaFarmaceuticaSimplMap               | NombreCanon                     | text                     |                          | YES         | 
+ FormaFarmaceuticaSimplificada           | Id                              | integer                  |                          | NO          | 
+ FormaFarmaceuticaSimplificada           | Nombre                          | character varying        |                      256 | NO          | 
+ FormaFarmaceuticaSimplificada           | NombreCanon                     | character varying        |                      256 | YES         | 
+ FormaFarmaceuticaSimplificadaDicStaging | Id                              | integer                  |                          | NO          | 
+ FormaFarmaceuticaSimplificadaDicStaging | Nombre                          | text                     |                          | NO          | 
+ FormaFarmaceuticaSimplificadaDicStaging | NombreCanon                     | character varying        |                      256 | YES         | 
+ Foto                                    | Id                              | bigint                   |                          | NO          | nextval('"Foto_Id_seq"'::regclass)
+ Foto                                    | NRegistro                       | character varying        |                       32 | NO          | 
+ Foto                                    | Tipo                            | character varying        |                       32 | YES         | 
+ Foto                                    | Url                             | text                     |                          | NO          | 
+ Foto                                    | FechaRaw                        | bigint                   |                          | YES         | 
+ Foto                                    | Fecha                           | timestamp with time zone |                          | YES         | 
+ Foto                                    | Orden                           | integer                  |                          | YES         | 
+ Foto                                    | Principal                       | boolean                  |                          | YES         | 
+ Laboratorio                             | Id                              | integer                  |                          | NO          | nextval('"Laboratorio_Id_seq"'::regclass)
+ Laboratorio                             | Nombre                          | character varying        |                      256 | NO          | 
+ Laboratorio                             | NombreCanon                     | character varying        |                      256 | YES         | 
+ Laboratorio                             | CodigoAemps                     | integer                  |                          | YES         | 
+ LaboratoriosDicStaging                  | Codigo                          | integer                  |                          | NO          | 
+ LaboratoriosDicStaging                  | Nombre                          | text                     |                          | NO          | 
+ LaboratoriosDicStaging                  | Direccion                       | text                     |                          | YES         | 
+ LaboratoriosDicStaging                  | CodigoPostal                    | text                     |                          | YES         | 
+ LaboratoriosDicStaging                  | Localidad                       | text                     |                          | YES         | 
+ LaboratoriosDicStaging                  | Cif                             | text                     |                          | YES         | 
+ LaboratoriosDicStaging                  | NombreCanon                     | character varying        |                      256 | YES         | 
+ MedicamentoAtc                          | NRegistro                       | character varying        |                       32 | NO          | 
+ MedicamentoAtc                          | Codigo                          | character varying        |                       16 | NO          | 
+ MedicamentoDetalleNotFound              | NRegistro                       | text                     |                          | NO          | 
+ MedicamentoDetalleNotFound              | HttpStatus                      | integer                  |                          | YES         | 
+ MedicamentoDetalleNotFound              | Reason                          | text                     |                          | YES         | 
+ MedicamentoDetalleNotFound              | Attempts                        | integer                  |                          | NO          | 0
+ MedicamentoDetalleNotFound              | FirstSeen                       | timestamp with time zone |                          | NO          | now()
+ MedicamentoDetalleNotFound              | LastTried                       | timestamp with time zone |                          | NO          | now()
+ MedicamentoDetalleRaw                   | NRegistro                       | character varying        |                       32 | NO          | 
+ MedicamentoDetalleRaw                   | RowHash                         | text                     |                          | NO          | 
+ MedicamentoDetalleRaw                   | ETag                            | text                     |                          | YES         | 
+ MedicamentoDetalleRaw                   | LastModified                    | timestamp with time zone |                          | YES         | 
+ MedicamentoDetalleRaw                   | FetchedAt                       | timestamp with time zone |                          | NO          | now()
+ MedicamentoDetalleRaw                   | Source                          | text                     |                          | NO          | 'cima_api'::text
+ MedicamentoDetalleRaw                   | HttpStatus                      | integer                  |                          | YES         | 
+ MedicamentoDetalleRaw                   | ErrorText                       | text                     |                          | YES         | 
+ MedicamentoDetalleRaw                   | Json                            | jsonb                    |                          | NO          | 
+ MedicamentoDetalleRaw                   | Fuente                          | text                     |                          | NO          | 'api'::text
+ MedicamentoDetalleStaging               | NRegistro                       | character varying        |                       32 | NO          | 
+ MedicamentoDetalleStaging               | DetalleJson                     | jsonb                    |                          | NO          | 
+ MedicamentoExcipiente                   | NRegistro                       | character varying        |                       32 | NO          | 
+ MedicamentoExcipiente                   | ExcipienteId                    | bigint                   |                          | NO          | 
+ MedicamentoExcipiente                   | Cantidad                        | character varying        |                       64 | YES         | 
+ MedicamentoExcipiente                   | Unidad                          | character varying        |                       64 | YES         | 
+ MedicamentoExcipiente                   | Obligatorio                     | boolean                  |                          | NO          | false
+ MedicamentoExcipiente                   | Orden                           | integer                  |                          | NO          | 
+ MedicamentoPresentacion                 | NRegistro                       | character varying        |                       32 | NO          | 
+ MedicamentoPresentacion                 | CN                              | character varying        |                       16 | NO          | 
+ MedicamentoSustancia                    | NRegistro                       | character varying        |                       32 | NO          | 
+ MedicamentoSustancia                    | SustanciaId                     | bigint                   |                          | NO          | 
+ MedicamentoSustancia                    | Cantidad                        | character varying        |                       64 | NO          | 
+ MedicamentoSustancia                    | Unidad                          | character varying        |                       64 | NO          | 
+ MedicamentoSustancia                    | CantidadNum_mg                  | numeric                  |                          | YES         | 
+ MedicamentoSustancia                    | Orden                           | integer                  |                          | YES         | 
+ MedicamentoSustancia                    | CodigoJson                      | text                     |                          | YES         | 
+ MedicamentoVia                          | NRegistro                       | character varying        |                       32 | NO          | 
+ MedicamentoVia                          | ViaId                           | integer                  |                          | NO          | 
+ MedicamentoViaOverrides                 | NRegistro                       | text                     |                          | NO          | 
+ MedicamentoViaOverrides                 | ViaId                           | integer                  |                          | NO          | 
+ MedicamentoViaOverrides                 | Motivo                          | text                     |                          | NO          | 
+ MedicamentoViaOverrides                 | CreatedAt                       | timestamp with time zone |                          | YES         | now()
+ Medicamentos                            | Id                              | uuid                     |                          | NO          | gen_random_uuid()
+ Medicamentos                            | Nombre                          | character varying        |                      512 | NO          | 
+ Medicamentos                            | CreatedAt                       | timestamp with time zone |                          | NO          | 
+ Medicamentos                            | Dosis                           | character varying        |                      128 | YES         | 
+ Medicamentos                            | Generico                        | boolean                  |                          | YES         | 
+ Medicamentos                            | LabTitular                      | character varying        |                      256 | YES         | 
+ Medicamentos                            | NRegistro                       | character varying        |                       32 | NO          | ''::character varying
+ Medicamentos                            | RawJson                         | jsonb                    |                          | NO          | '{}'::jsonb
+ Medicamentos                            | Receta                          | boolean                  |                          | YES         | 
+ Medicamentos                            | UpdatedAt                       | timestamp with time zone |                          | NO          | '-infinity'::timestamp with time zone
+ Medicamentos                            | FormaFarmaceuticaId             | integer                  |                          | YES         | 
+ Medicamentos                            | FormaFarmaceuticaSimplificadaId | integer                  |                          | YES         | 
+ Medicamentos                            | VtmId                           | bigint                   |                          | YES         | 
+ Medicamentos                            | RawJsonDetalle                  | jsonb                    |                          | YES         | 
+ Medicamentos                            | EnrichedAt                      | timestamp with time zone |                          | YES         | 
+ Medicamentos                            | Comercializado                  | boolean                  |                          | YES         | 
+ Medicamentos                            | FechaAutorizacion               | timestamp with time zone |                          | YES         | 
+ Medicamentos                            | FechaSuspension                 | timestamp with time zone |                          | YES         | 
+ Medicamentos                            | FechaRevocacion                 | timestamp with time zone |                          | YES         | 
+ Medicamentos                            | AfectaConduccion                | boolean                  |                          | YES         | 
+ Medicamentos                            | TrianguloNegro                  | boolean                  |                          | YES         | 
+ Medicamentos                            | Huerfano                        | boolean                  |                          | YES         | 
+ Medicamentos                            | Biosimilar                      | boolean                  |                          | YES         | 
+ Medicamentos                            | MaterialesInformativos          | boolean                  |                          | YES         | 
+ Medicamentos                            | Fotos                           | boolean                  |                          | YES         | 
+ Medicamentos                            | Psum                            | boolean                  |                          | YES         | 
+ Medicamentos                            | LaboratorioTitularId            | integer                  |                          | YES         | 
+ Medicamentos                            | LaboratorioComercializadorId    | integer                  |                          | YES         | 
+ Outbox                                  | Id                              | bigint                   |                          | NO          | nextval('"Outbox_Id_seq"'::regclass)
+ Outbox                                  | Entity                          | text                     |                          | NO          | 
+ Outbox                                  | EntityKey                       | text                     |                          | NO          | 
+ Outbox                                  | Action                          | text                     |                          | NO          | 
+ Outbox                                  | PayloadJson                     | jsonb                    |                          | NO          | 
+ Outbox                                  | RowHash                         | text                     |                          | NO          | 
+ Outbox                                  | CreatedAt                       | timestamp with time zone |                          | NO          | now()
+ PrescripcionDelta                       | SyncRunId                       | bigint                   |                          | NO          | 
+ PrescripcionDelta                       | Entidad                         | text                     |                          | NO          | 
+ PrescripcionDelta                       | Clave                           | text                     |                          | NO          | 
+ PrescripcionDelta                       | Accion                          | text                     |                          | NO          | 
+ PrescripcionDelta                       | CambioJson                      | jsonb                    |                          | NO          | 
+ PrescripcionDelta                       | RowHash                         | text                     |                          | NO          | 
+ PrescripcionDelta                       | CreatedAt                       | timestamp with time zone |                          | NO          | now()
+ PrescripcionStaging                     | CodNacion                       | character varying        |                       16 | NO          | 
+ PrescripcionStaging                     | NRegistro                       | character varying        |                       32 | NO          | 
+ PrescripcionStaging                     | CodDcp                          | character varying        |                       16 | YES         | 
+ PrescripcionStaging                     | CodDcpf                         | character varying        |                       16 | YES         | 
+ PrescripcionStaging                     | CodDcsa                         | character varying        |                       16 | YES         | 
+ PrescripcionStaging                     | DesNomco                        | text                     |                          | YES         | 
+ PrescripcionStaging                     | DesPrese                        | text                     |                          | YES         | 
+ PrescripcionStaging                     | DesDosific                      | text                     |                          | YES         | 
+ PrescripcionStaging                     | CodEnvase                       | integer                  |                          | YES         | 
+ PrescripcionStaging                     | Contenido                       | numeric                  |                          | YES         | 
+ PrescripcionStaging                     | UnidadContenidoCodigo           | character varying        |                       16 | YES         | 
+ PrescripcionStaging                     | NroConte                        | text                     |                          | YES         | 
+ PrescripcionStaging                     | UrlFictec                       | text                     |                          | YES         | 
+ PrescripcionStaging                     | UrlProsp                        | text                     |                          | YES         | 
+ PrescripcionStaging                     | SwPsicotropo                    | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | SwEstupefaciente                | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | SwAfectaConduccion              | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | SwTrianguloNegro                | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | SwReceta                        | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | SwGenerico                      | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | SwSustituible                   | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | SwEnvaseClinico                 | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | SwUsoHospitalario               | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | SwDiagnosticoHospitalario       | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | SwTld                           | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | SwEspecialControlMedico         | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | SwHuerfano                      | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | SwBaseAPlantas                  | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | Biosimilar                      | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | ImportacionParalela             | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | Radiofarmaco                    | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | Serializacion                   | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | LabTitularCodigo                | integer                  |                          | YES         | 
+ PrescripcionStaging                     | LabComercializadorCodigo        | integer                  |                          | YES         | 
+ PrescripcionStaging                     | FechaAutorizacion               | date                     |                          | YES         | 
+ PrescripcionStaging                     | SwComercializado                | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | FechaComercializacion           | date                     |                          | YES         | 
+ PrescripcionStaging                     | CodSitReg                       | integer                  |                          | YES         | 
+ PrescripcionStaging                     | CodSitRegPresen                 | integer                  |                          | YES         | 
+ PrescripcionStaging                     | FechaSitReg                     | date                     |                          | YES         | 
+ PrescripcionStaging                     | FechaSitRegPresen               | date                     |                          | YES         | 
+ PrescripcionStaging                     | SwTieneExcipDeclOblig           | boolean                  |                          | YES         | 
+ PrescripcionStaging                     | HeaderDate                      | date                     |                          | YES         | 
+ PrescripcionStaging                     | Hash                            | text                     |                          | YES         | 
+ PrescripcionStaging_NUEVO               | CodNacion                       | character varying        |                       16 | NO          | 
+ PrescripcionStaging_NUEVO               | NRegistro                       | character varying        |                       32 | NO          | 
+ PrescripcionStaging_NUEVO               | CodDcp                          | character varying        |                       16 | YES         | 
+ PrescripcionStaging_NUEVO               | CodDcpf                         | character varying        |                       16 | YES         | 
+ PrescripcionStaging_NUEVO               | CodDcsa                         | character varying        |                       16 | YES         | 
+ PrescripcionStaging_NUEVO               | DesNomco                        | text                     |                          | YES         | 
+ PrescripcionStaging_NUEVO               | DesPrese                        | text                     |                          | YES         | 
+ PrescripcionStaging_NUEVO               | DesDosific                      | text                     |                          | YES         | 
+ PrescripcionStaging_NUEVO               | CodEnvase                       | integer                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | Contenido                       | numeric                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | UnidadContenidoCodigo           | character varying        |                       16 | YES         | 
+ PrescripcionStaging_NUEVO               | NroConte                        | text                     |                          | YES         | 
+ PrescripcionStaging_NUEVO               | UrlFictec                       | text                     |                          | YES         | 
+ PrescripcionStaging_NUEVO               | UrlProsp                        | text                     |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwPsicotropo                    | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwEstupefaciente                | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwAfectaConduccion              | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwTrianguloNegro                | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwReceta                        | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwGenerico                      | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwSustituible                   | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwEnvaseClinico                 | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwUsoHospitalario               | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwDiagnosticoHospitalario       | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwTld                           | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwEspecialControlMedico         | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwHuerfano                      | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwBaseAPlantas                  | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | Biosimilar                      | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | ImportacionParalela             | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | Radiofarmaco                    | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | Serializacion                   | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | LabTitularCodigo                | integer                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | LabComercializadorCodigo        | integer                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | FechaAutorizacion               | date                     |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwComercializado                | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | FechaComercializacion           | date                     |                          | YES         | 
+ PrescripcionStaging_NUEVO               | CodSitReg                       | integer                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | CodSitRegPresen                 | integer                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | FechaSitReg                     | date                     |                          | YES         | 
+ PrescripcionStaging_NUEVO               | FechaSitRegPresen               | date                     |                          | YES         | 
+ PrescripcionStaging_NUEVO               | SwTieneExcipDeclOblig           | boolean                  |                          | YES         | 
+ PrescripcionStaging_NUEVO               | HeaderDate                      | date                     |                          | YES         | 
+ PrescripcionStaging_NUEVO               | Hash                            | text                     |                          | YES         | 
+ Presentacion                            | CN                              | character varying        |                       16 | NO          | 
+ Presentacion                            | Nombre                          | character varying        |                      512 | NO          | 
+ Presentacion                            | Comercial                       | boolean                  |                          | YES         | 
+ Presentacion                            | Psum                            | boolean                  |                          | YES         | 
+ Presentacion                            | FechaAut                        | timestamp with time zone |                          | YES         | 
+ PresentacionContenido                   | CN                              | character varying        |                       16 | NO          | 
+ PresentacionContenido                   | Secuencia                       | integer                  |                          | NO          | 
+ PresentacionContenido                   | EnvaseId                        | integer                  |                          | YES         | 
+ PresentacionContenido                   | Envase                          | text                     |                          | YES         | 
+ PresentacionContenido                   | CantidadRaw                     | text                     |                          | YES         | 
+ PresentacionContenido                   | CantidadNum                     | numeric                  |                          | YES         | 
+ PresentacionContenido                   | UnidadId                        | integer                  |                          | YES         | 
+ PresentacionContenido                   | Unidad                          | text                     |                          | YES         | 
+ PresentacionContenido                   | Notas                           | text                     |                          | YES         | 
+ PresentacionContenidoStaging            | CN                              | character varying        |                       16 | NO          | 
+ PresentacionContenidoStaging            | Secuencia                       | integer                  |                          | NO          | 
+ PresentacionContenidoStaging            | EnvaseId                        | integer                  |                          | YES         | 
+ PresentacionContenidoStaging            | Envase                          | text                     |                          | YES         | 
+ PresentacionContenidoStaging            | CantidadRaw                     | text                     |                          | YES         | 
+ PresentacionContenidoStaging            | CantidadNum                     | numeric                  |                          | YES         | 
+ PresentacionContenidoStaging            | UnidadId                        | integer                  |                          | YES         | 
+ PresentacionContenidoStaging            | Unidad                          | text                     |                          | YES         | 
+ PresentacionContenidoStaging            | Notas                           | text                     |                          | YES         | 
+ PrincipioActivoStaging                  | NRegistro                       | character varying        |                          | NO          | 
+ PrincipioActivoStaging                  | Orden                           | integer                  |                          | NO          | 
+ PrincipioActivoStaging                  | CodigoRaw                       | text                     |                          | YES         | 
+ PrincipioActivoStaging                  | NombreRaw                       | text                     |                          | YES         | 
+ PrincipioActivoStaging                  | UnidadRaw                       | text                     |                          | YES         | 
+ PrincipioActivoStaging                  | CantidadRaw                     | text                     |                          | YES         | 
+ PrincipioActivoStaging                  | NombreCanon                     | text                     |                          | YES         | 
+ PrincipioActivoStaging                  | SustanciaId                     | integer                  |                          | YES         | 
+ PrincipiosActivos                       | Codigo                          | text                     |                          | NO          | 
+ PrincipiosActivos                       | Nombre                          | text                     |                          | YES         | 
+ PrincipiosActivos                       | Lista                           | text                     |                          | YES         | 
+ PrincipiosActivosXmlTemp                | Codigo                          | text                     |                          | NO          | 
+ PrincipiosActivosXmlTemp                | Nombre                          | text                     |                          | YES         | 
+ PrincipiosActivosXmlTemp                | Lista                           | text                     |                          | YES         | 
+ SituacionRegistroDicStaging             | Codigo                          | integer                  |                          | NO          | 
+ SituacionRegistroDicStaging             | Nombre                          | text                     |                          | NO          | 
+ SituacionRegistroDicStaging             | NombreCanon                     | character varying        |                      256 | YES         | 
+ SustanciaActiva                         | Id                              | bigint                   |                          | NO          | 
+ SustanciaActiva                         | Nombre                          | character varying        |                      256 | NO          | 
+ SustanciaActiva                         | Codigo                          | text                     |                          | YES         | 
+ SustanciaActiva                         | ListaPsicotropo                 | text                     |                          | YES         | 
+ SyncRun                                 | Id                              | bigint                   |                          | NO          | nextval('"SyncRun_Id_seq"'::regclass)
+ SyncRun                                 | Kind                            | text                     |                          | NO          | 'daily'::text
+ SyncRun                                 | StartedAt                       | timestamp with time zone |                          | NO          | now()
+ SyncRun                                 | FinishedAt                      | timestamp with time zone |                          | YES         | 
+ SyncRun                                 | Ok                              | boolean                  |                          | YES         | 
+ SyncRun                                 | ApiCalls                        | integer                  |                          | YES         | 
+ SyncRun                                 | Found                           | integer                  |                          | YES         | 
+ SyncRun                                 | Changed                         | integer                  |                          | YES         | 
+ SyncRun                                 | Unchanged                       | integer                  |                          | YES         | 
+ SyncRun                                 | DurationMs                      | integer                  |                          | YES         | 
+ SyncRun                                 | ErrorsJson                      | jsonb                    |                          | YES         | 
+ SyncRun                                 | InicioAt                        | timestamp with time zone |                          | NO          | now()
+ SyncRun                                 | Tipo                            | text                     |                          | NO          | 'desconocido'::text
+ SyncRun                                 | FinAt                           | timestamp with time zone |                          | YES         | 
+ SyncRun                                 | Resumen                         | jsonb                    |                          | YES         | 
+ SyncRun                                 | Errores                         | jsonb                    |                          | YES         | 
+ ViaAdminMap                             | IdJson                          | integer                  |                          | YES         | 
+ ViaAdminMap                             | IdDic                           | integer                  |                          | YES         | 
+ ViaAdminMap                             | NombreCanon                     | text                     |                          | YES         | 
+ ViaAdministracion                       | Id                              | integer                  |                          | NO          | 
+ ViaAdministracion                       | Nombre                          | character varying        |                      256 | NO          | 
+ ViaAdministracion                       | NombreCanon                     | character varying        |                      256 | YES         | 
+ ViaAdministracionDicStaging             | Id                              | integer                  |                          | NO          | 
+ ViaAdministracionDicStaging             | Nombre                          | text                     |                          | NO          | 
+ ViaAdministracionDicStaging             | NombreCanon                     | character varying        |                      256 | YES         | 
+ ViaAdministracionMap                    | IdCima                          | integer                  |                          | NO          | 
+ ViaAdministracionMap                    | IdPresc                         | integer                  |                          | YES         | 
+ ViaAdministracionMap                    | NombreCanon                     | text                     |                          | NO          | 
+ Vtm                                     | Id                              | bigint                   |                          | NO          | 
+ Vtm                                     | Nombre                          | character varying        |                      256 | NO          | 
+ _DcpCsv                                 | CN                              | character varying        |                       16 | NO          | 
+ _DcpCsv                                 | CantidadRaw                     | text                     |                          | YES         | 
+ _DcpCsv                                 | UnidadCodigo                    | character varying        |                       16 | YES         | 
+ _DcpCsv                                 | Envase                          | text                     |                          | YES         | 
+ _EnvasesCsv                             | Nombre                          | text                     |                          | NO          | 
+ _UnidadContenidoCsv                     | Codigo                          | character varying        |                       16 | NO          | 
+ _UnidadContenidoCsv                     | Nombre                          | text                     |                          | NO          | 
+ __EFMigrationsHistory                   | MigrationId                     | character varying        |                      150 | NO          | 
+ __EFMigrationsHistory                   | ProductVersion                  | character varying        |                       32 | NO          | 
+ excip_dic_map                           | cod                             | text                     |                          | NO          | 
+ excip_dic_map                           | excipiente_id                   | bigint                   |                          | NO          | 
+ graph_edge                              | src_type                        | text                     |                          | NO          | 
+ graph_edge                              | src_key                         | text                     |                          | NO          | 
+ graph_edge                              | rel                             | text                     |                          | NO          | 
+ graph_edge                              | dst_type                        | text                     |                          | NO          | 
+ graph_edge                              | dst_key                         | text                     |                          | NO          | 
+ graph_edge                              | props                           | jsonb                    |                          | YES         | '{}'::jsonb
+ graph_node                              | node_type                       | text                     |                          | NO          | 
+ graph_node                              | node_key                        | text                     |                          | NO          | 
+ graph_node                              | name                            | text                     |                          | YES         | 
+ graph_node                              | props                           | jsonb                    |                          | YES         | '{}'::jsonb
+ med_quarantine                          | nregistro                       | text                     |                          | NO          | 
+ med_quarantine                          | motivo                          | text                     |                          | YES         | 
+ med_quarantine                          | created_at                      | timestamp with time zone |                          | YES         | now()
+ meds_ft                                 | NRegistro                       | character varying        |                       32 | YES         | 
+ meds_ft                                 | tsv                             | tsvector                 |                          | YES         | 
+ pa_map                                  | codigo_json                     | text                     |                          | YES         | 
+ pa_map                                  | codigo_num                      | integer                  |                          | YES         | 
+ pa_map                                  | nom                             | text                     |                          | YES         | 
+ pa_map                                  | sa_id                           | integer                  |                          | YES         | 
+ pa_map                                  | sa_codigo                       | text                     |                          | YES         | 
+ pa_map                                  | sa_nombre                       | text                     |                          | YES         | 
+ pa_unmatched                            | codigo_json                     | text                     |                          | YES         | 
+ pa_unmatched                            | codigo_num                      | integer                  |                          | YES         | 
+ pa_unmatched                            | nom                             | text                     |                          | YES         | 
+ pa_unmatched                            | categoria                       | text                     |                          | YES         | 
+ pa_unmatched_map                        | codigo_json                     | text                     |                          | NO          | 
+ pa_unmatched_map                        | nom                             | text                     |                          | NO          | 
+ pa_unmatched_map                        | categoria                       | text                     |                          | NO          | 
+ pa_unmatched_map                        | target                          | text                     |                          | YES         | 
+ pa_unmatched_map                        | target_id                       | integer                  |                          | YES         | 
+ pa_unmatched_map                        | notes                           | text                     |                          | YES         | 
+ pa_unmatched_map                        | created_at                      | timestamp with time zone |                          | YES         | now()
+ pa_unmatched_map                        | updated_at                      | timestamp with time zone |                          | YES         | now()
+ search_terms                            | tipo                            | text                     |                          | YES         | 
+ search_terms                            | clave                           | text                     |                          | YES         | 
+ search_terms                            | termino                         | character varying        |                          | YES         | 
+ vExcipienteCanon                        | ExcipienteId                    | bigint                   |                          | YES         | 
+ vExcipienteCanon                        | NombreOficial                   | character varying        |                      256 | YES         | 
+ vExcipienteCanon                        | Alias                           | text                     |                          | YES         | 
+ vExcipienteCanon                        | AliasCanon                      | character varying        |                      256 | YES         | 
+ vExcipienteSearch                       | ExcipienteId                    | bigint                   |                          | YES         | 
+ vExcipienteSearch                       | NombreOficial                   | character varying        |                      256 | YES         | 
+ vExcipienteSearch                       | Alias                           | text                     |                          | YES         | 
+ vExcipienteSearch                       | AliasCanon                      | character varying        |                      256 | YES         | 
+ vMedConFotos                            | NRegistro                       | character varying        |                       32 | YES         | 
+ vMedConFotos                            | Nombre                          | character varying        |                      512 | YES         | 
+ vMedConFotos                            | Comercializado                  | boolean                  |                          | YES         | 
+ vMedConFotos                            | FechaAutorizacion               | timestamp with time zone |                          | YES         | 
+ vMedConFotos                            | AfectaConduccion                | boolean                  |                          | YES         | 
+ vMedConFotos                            | TrianguloNegro                  | boolean                  |                          | YES         | 
+ vMedConFotos                            | Huerfano                        | boolean                  |                          | YES         | 
+ vMedConFotos                            | Biosimilar                      | boolean                  |                          | YES         | 
+ vMedConFotos                            | Psum                            | boolean                  |                          | YES         | 
+ vMedConFotos                            | Fotos                           | boolean                  |                          | YES         | 
+ vMedConFotos                            | n_sustancias                    | bigint                   |                          | YES         | 
+ vMedConFotos                            | n_vias                          | bigint                   |                          | YES         | 
+ vMedConFotos                            | n_excipientes                   | bigint                   |                          | YES         | 
+ vMedConFotos                            | n_atc                           | bigint                   |                          | YES         | 
+ vMedConFotos                            | n_cn                            | bigint                   |                          | YES         | 
+ vMedConFotos                            | fecha_doc_max                   | timestamp with time zone |                          | YES         | 
+ vMedConPsum                             | NRegistro                       | character varying        |                       32 | YES         | 
+ vMedConPsum                             | Nombre                          | character varying        |                      512 | YES         | 
+ vMedConPsum                             | Comercializado                  | boolean                  |                          | YES         | 
+ vMedConPsum                             | FechaAutorizacion               | timestamp with time zone |                          | YES         | 
+ vMedConPsum                             | AfectaConduccion                | boolean                  |                          | YES         | 
+ vMedConPsum                             | TrianguloNegro                  | boolean                  |                          | YES         | 
+ vMedConPsum                             | Huerfano                        | boolean                  |                          | YES         | 
+ vMedConPsum                             | Biosimilar                      | boolean                  |                          | YES         | 
+ vMedConPsum                             | Psum                            | boolean                  |                          | YES         | 
+ vMedConPsum                             | Fotos                           | boolean                  |                          | YES         | 
+ vMedConPsum                             | n_sustancias                    | bigint                   |                          | YES         | 
+ vMedConPsum                             | n_vias                          | bigint                   |                          | YES         | 
+ vMedConPsum                             | n_excipientes                   | bigint                   |                          | YES         | 
+ vMedConPsum                             | n_atc                           | bigint                   |                          | YES         | 
+ vMedConPsum                             | n_cn                            | bigint                   |                          | YES         | 
+ vMedConPsum                             | fecha_doc_max                   | timestamp with time zone |                          | YES         | 
+ vMedResumen                             | NRegistro                       | character varying        |                       32 | YES         | 
+ vMedResumen                             | Nombre                          | character varying        |                      512 | YES         | 
+ vMedResumen                             | Comercializado                  | boolean                  |                          | YES         | 
+ vMedResumen                             | FechaAutorizacion               | timestamp with time zone |                          | YES         | 
+ vMedResumen                             | AfectaConduccion                | boolean                  |                          | YES         | 
+ vMedResumen                             | TrianguloNegro                  | boolean                  |                          | YES         | 
+ vMedResumen                             | Huerfano                        | boolean                  |                          | YES         | 
+ vMedResumen                             | Biosimilar                      | boolean                  |                          | YES         | 
+ vMedResumen                             | Psum                            | boolean                  |                          | YES         | 
+ vMedResumen                             | Fotos                           | boolean                  |                          | YES         | 
+ vMedResumen                             | n_sustancias                    | bigint                   |                          | YES         | 
+ vMedResumen                             | n_vias                          | bigint                   |                          | YES         | 
+ vMedResumen                             | n_excipientes                   | bigint                   |                          | YES         | 
+ vMedResumen                             | n_atc                           | bigint                   |                          | YES         | 
+ vMedResumen                             | n_cn                            | bigint                   |                          | YES         | 
+ vMedResumen                             | fecha_doc_max                   | timestamp with time zone |                          | YES         | 
+ vMedSinExcipientes                      | NRegistro                       | character varying        |                       32 | YES         | 
+ vMedSinExcipientes                      | Nombre                          | character varying        |                      512 | YES         | 
+ vMedSinExcipientes                      | Comercializado                  | boolean                  |                          | YES         | 
+ vMedSinExcipientes                      | FechaAutorizacion               | timestamp with time zone |                          | YES         | 
+ vMedSinExcipientes                      | AfectaConduccion                | boolean                  |                          | YES         | 
+ vMedSinExcipientes                      | TrianguloNegro                  | boolean                  |                          | YES         | 
+ vMedSinExcipientes                      | Huerfano                        | boolean                  |                          | YES         | 
+ vMedSinExcipientes                      | Biosimilar                      | boolean                  |                          | YES         | 
+ vMedSinExcipientes                      | Psum                            | boolean                  |                          | YES         | 
+ vMedSinExcipientes                      | Fotos                           | boolean                  |                          | YES         | 
+ vMedSinExcipientes                      | n_sustancias                    | bigint                   |                          | YES         | 
+ vMedSinExcipientes                      | n_vias                          | bigint                   |                          | YES         | 
+ vMedSinExcipientes                      | n_excipientes                   | bigint                   |                          | YES         | 
+ vMedSinExcipientes                      | n_atc                           | bigint                   |                          | YES         | 
+ vMedSinExcipientes                      | n_cn                            | bigint                   |                          | YES         | 
+ vMedSinExcipientes                      | fecha_doc_max                   | timestamp with time zone |                          | YES         | 
+ vMedSinFotos                            | NRegistro                       | character varying        |                       32 | YES         | 
+ vMedSinFotos                            | Nombre                          | character varying        |                      512 | YES         | 
+ vMedSinFotos                            | Comercializado                  | boolean                  |                          | YES         | 
+ vMedSinFotos                            | FechaAutorizacion               | timestamp with time zone |                          | YES         | 
+ vMedSinFotos                            | AfectaConduccion                | boolean                  |                          | YES         | 
+ vMedSinFotos                            | TrianguloNegro                  | boolean                  |                          | YES         | 
+ vMedSinFotos                            | Huerfano                        | boolean                  |                          | YES         | 
+ vMedSinFotos                            | Biosimilar                      | boolean                  |                          | YES         | 
+ vMedSinFotos                            | Psum                            | boolean                  |                          | YES         | 
+ vMedSinFotos                            | Fotos                           | boolean                  |                          | YES         | 
+ vMedSinFotos                            | n_sustancias                    | bigint                   |                          | YES         | 
+ vMedSinFotos                            | n_vias                          | bigint                   |                          | YES         | 
+ vMedSinFotos                            | n_excipientes                   | bigint                   |                          | YES         | 
+ vMedSinFotos                            | n_atc                           | bigint                   |                          | YES         | 
+ vMedSinFotos                            | n_cn                            | bigint                   |                          | YES         | 
+ vMedSinFotos                            | fecha_doc_max                   | timestamp with time zone |                          | YES         | 
+ vMedTriangulo                           | NRegistro                       | character varying        |                       32 | YES         | 
+ vMedTriangulo                           | Nombre                          | character varying        |                      512 | YES         | 
+ vMedTriangulo                           | Comercializado                  | boolean                  |                          | YES         | 
+ vMedTriangulo                           | FechaAutorizacion               | timestamp with time zone |                          | YES         | 
+ vMedTriangulo                           | AfectaConduccion                | boolean                  |                          | YES         | 
+ vMedTriangulo                           | TrianguloNegro                  | boolean                  |                          | YES         | 
+ vMedTriangulo                           | Huerfano                        | boolean                  |                          | YES         | 
+ vMedTriangulo                           | Biosimilar                      | boolean                  |                          | YES         | 
+ vMedTriangulo                           | Psum                            | boolean                  |                          | YES         | 
+ vMedTriangulo                           | Fotos                           | boolean                  |                          | YES         | 
+ vMedTriangulo                           | n_sustancias                    | bigint                   |                          | YES         | 
+ vMedTriangulo                           | n_vias                          | bigint                   |                          | YES         | 
+ vMedTriangulo                           | n_excipientes                   | bigint                   |                          | YES         | 
+ vMedTriangulo                           | n_atc                           | bigint                   |                          | YES         | 
+ vMedTriangulo                           | n_cn                            | bigint                   |                          | YES         | 
+ vMedTriangulo                           | fecha_doc_max                   | timestamp with time zone |                          | YES         | 
+ vMedicamentoAtcExpanded                 | NRegistro                       | character varying        |                       32 | YES         | 
+ vMedicamentoAtcExpanded                 | Codigo                          | character varying        |                       16 | YES         | 
+ vMedicamentoAtcExpanded                 | CodigoAncestro                  | character varying        |                       16 | YES         | 
+ vMedicamentoAtcExpanded                 | NombreAncestro                  | character varying        |                      256 | YES         | 
+ vMedicamentoAtcExpanded                 | NivelAncestro                   | smallint                 |                          | YES         | 
+ vMedicamentoExcipientesJson             | NRegistro                       | character varying        |                       32 | YES         | 
+ vMedicamentoExcipientesJson             | ExcipienteId                    | bigint                   |                          | YES         | 
+ vMedicamentoExcipientesJson             | Nombre                          | text                     |                          | YES         | 
+ vMedicamentoExcipientesJson             | Obligatorio                     | boolean                  |                          | YES         | 
+ vMedicamentoExcipientesJson             | Cantidad                        | text                     |                          | YES         | 
+ vMedicamentoExcipientesJson             | Unidad                          | text                     |                          | YES         | 
+ vMedicamentoExcipientesJson             | Orden                           | integer                  |                          | YES         | 
+ vMedicamentoExcipientesPendientes       | NRegistro                       | character varying        |                       32 | YES         | 
+ vMedicamentoExcipientesPendientes       | ExcipienteId                    | bigint                   |                          | YES         | 
+ vMedicamentoExcipientesPendientes       | Obligatorio                     | boolean                  |                          | YES         | 
+ vMedicamentoExcipientesPendientes       | Cantidad                        | text                     |                          | YES         | 
+ vMedicamentoExcipientesPendientes       | Unidad                          | text                     |                          | YES         | 
+ vMedicamentoExcipientesResolved         | NRegistro                       | character varying        |                       32 | YES         | 
+ vMedicamentoExcipientesResolved         | ExcipienteId                    | bigint                   |                          | YES         | 
+ vMedicamentoExcipientesResolved         | Obligatorio                     | boolean                  |                          | YES         | 
+ vMedicamentoExcipientesResolved         | Cantidad                        | text                     |                          | YES         | 
+ vMedicamentoExcipientesResolved         | Unidad                          | text                     |                          | YES         | 
+ vMedicamentoExcipientesResolved         | NombreOficial                   | character varying        |                      256 | YES         | 
+ vMedicamentoExcipientesResolved         | ExcipienteDesconocido           | boolean                  |                          | YES         | 
+ vMedicamentoViasCanon                   | NRegistro                       | character varying        |                       32 | YES         | 
+ vMedicamentoViasCanon                   | ViaId                           | integer                  |                          | YES         | 
+ vMedicamentoViasCanon                   | via_nombre                      | text                     |                          | YES         | 
+ vMedsSinPresentacion                    | NRegistro                       | text                     |                          | YES         | 
+ vMedsSinPresentacion                    | tiene_edge_grafo                | boolean                  |                          | YES         | 
+ vMedsSinPresentacion                    | tiene_codnacion_presc           | boolean                  |                          | YES         | 
+ v_excip_dic_map                         | CodExcipiente                   | text                     |                          | YES         | 
+ v_excip_dic_map                         | nombre_dic                      | text                     |                          | YES         | 
+ v_excip_dic_map                         | excipiente_id                   | bigint                   |                          | YES         | 
+ v_excip_dic_map_exact                   | CodExcipiente                   | text                     |                          | YES         | 
+ v_excip_dic_map_exact                   | nombre_dic                      | text                     |                          | YES         | 
+ v_excip_dic_map_exact                   | excipiente_id                   | bigint                   |                          | YES         | 
+ v_grafo_excipientes                     | src_type                        | text                     |                          | YES         | 
+ v_grafo_excipientes                     | src_key                         | text                     |                          | YES         | 
+ v_grafo_excipientes                     | rel                             | text                     |                          | YES         | 
+ v_grafo_excipientes                     | dst_type                        | text                     |                          | YES         | 
+ v_grafo_excipientes                     | dst_key                         | text                     |                          | YES         | 
+ v_grafo_excipientes                     | props                           | jsonb                    |                          | YES         | 
+ v_med_excip                             | nregistro                       | text                     |                          | YES         | 
+ v_med_excip                             | excipiente_id                   | integer                  |                          | YES         | 
+ v_med_excip                             | n_ocurrencias                   | text                     |                          | YES         | 
+ v_med_excip                             | ocurrencias_json                | jsonb                    |                          | YES         | 
+ v_medicamentos_clean                    | Id                              | uuid                     |                          | YES         | 
+ v_medicamentos_clean                    | Nombre                          | character varying        |                      512 | YES         | 
+ v_medicamentos_clean                    | CreatedAt                       | timestamp with time zone |                          | YES         | 
+ v_medicamentos_clean                    | Dosis                           | character varying        |                      128 | YES         | 
+ v_medicamentos_clean                    | Generico                        | boolean                  |                          | YES         | 
+ v_medicamentos_clean                    | LabTitular                      | character varying        |                      256 | YES         | 
+ v_medicamentos_clean                    | NRegistro                       | character varying        |                       32 | YES         | 
+ v_medicamentos_clean                    | RawJson                         | jsonb                    |                          | YES         | 
+ v_medicamentos_clean                    | Receta                          | boolean                  |                          | YES         | 
+ v_medicamentos_clean                    | UpdatedAt                       | timestamp with time zone |                          | YES         | 
+ v_medicamentos_clean                    | FormaFarmaceuticaId             | integer                  |                          | YES         | 
+ v_medicamentos_clean                    | FormaFarmaceuticaSimplificadaId | integer                  |                          | YES         | 
+ v_medicamentos_clean                    | VtmId                           | bigint                   |                          | YES         | 
+ v_medicamentos_clean                    | RawJsonDetalle                  | jsonb                    |                          | YES         | 
+ v_medicamentos_clean                    | EnrichedAt                      | timestamp with time zone |                          | YES         | 
+ v_medicamentos_clean                    | Comercializado                  | boolean                  |                          | YES         | 
+ v_medicamentos_clean                    | FechaAutorizacion               | timestamp with time zone |                          | YES         | 
+ v_medicamentos_clean                    | FechaSuspension                 | timestamp with time zone |                          | YES         | 
+ v_medicamentos_clean                    | FechaRevocacion                 | timestamp with time zone |                          | YES         | 
+ v_medicamentos_clean                    | AfectaConduccion                | boolean                  |                          | YES         | 
+ v_medicamentos_clean                    | TrianguloNegro                  | boolean                  |                          | YES         | 
+ v_medicamentos_clean                    | Huerfano                        | boolean                  |                          | YES         | 
+ v_medicamentos_clean                    | Biosimilar                      | boolean                  |                          | YES         | 
+ v_medicamentos_clean                    | MaterialesInformativos          | boolean                  |                          | YES         | 
+ v_medicamentos_clean                    | Fotos                           | boolean                  |                          | YES         | 
+ v_medicamentos_clean                    | Psum                            | boolean                  |                          | YES         | 
+ v_medicamentos_clean                    | LaboratorioTitularId            | integer                  |                          | YES         | 
+ v_medicamentos_clean                    | LaboratorioComercializadorId    | integer                  |                          | YES         | 
+(559 rows)
+
