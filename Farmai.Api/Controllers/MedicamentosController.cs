@@ -21,36 +21,77 @@ public class MedicamentosController : ControllerBase
     }
 
     /// <summary>
-    /// Búsqueda simple por nombre y laboratorio (usa ILIKE → trigram index).
+    /// Búsqueda avanzada de medicamentos con filtros opcionales
     /// </summary>
-    /// <param name="q">Texto a buscar (parcial, sin mayúsculas/minúsculas)</param>
-    /// <param name="limit">Límite de resultados (por defecto 25, máx 200)</param>
+    /// <param name="q">Texto a buscar (nombre, laboratorio, nregistro) - OPCIONAL</param>
+    /// <param name="generico">Filtrar por genérico: true/false - OPCIONAL</param>
+    /// <param name="receta">Filtrar por receta: true/false - OPCIONAL</param>
+    /// <param name="limit">Límite de resultados (por defecto 50, máx 200)</param>
+    /// <param name="offset">Offset para paginación (por defecto 0)</param>
     [HttpGet("search")]
-    public async Task<IActionResult> Search([FromQuery] string q, [FromQuery] int limit = 25, CancellationToken ct = default)
+    public async Task<IActionResult> Search(
+        [FromQuery] string? q, 
+        [FromQuery] bool? generico,
+        [FromQuery] bool? receta,
+        [FromQuery] int limit = 50, 
+        [FromQuery] int offset = 0,
+        CancellationToken ct = default)
     {
-        if (string.IsNullOrWhiteSpace(q))
-            return BadRequest(new { error = "Parámetro q es obligatorio" });
+        // Validar límites
+        limit = limit <= 0 ? 50 : (limit > 200 ? 200 : limit);
+        offset = offset < 0 ? 0 : offset;
 
-        limit = limit <= 0 ? 25 : (limit > 200 ? 200 : limit);
+        // Construir query base
+        var query = _db.Medicamentos.AsQueryable();
 
-        var list = await _db.Medicamentos
-            .Where(m =>
+        // Aplicar filtro de texto si existe
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            query = query.Where(m =>
                 EF.Functions.ILike(m.Nombre, $"%{q}%") ||
-                EF.Functions.ILike(m.LabTitular!, $"%{q}%")
-            )
+                EF.Functions.ILike(m.LabTitular!, $"%{q}%") ||
+                m.NRegistro!.Contains(q)
+            );
+        }
+
+        // Aplicar filtro de genérico
+        if (generico.HasValue)
+        {
+            query = query.Where(m => m.Generico == generico.Value);
+        }
+
+        // Aplicar filtro de receta
+        if (receta.HasValue)
+        {
+            query = query.Where(m => m.Receta == receta.Value);
+        }
+
+        // Obtener total antes de paginar
+        var total = await query.CountAsync(ct);
+
+        // Obtener resultados paginados
+        var resultados = await query
             .OrderBy(m => m.Nombre)
-            .Select(m => new {
-                m.NRegistro,
-                m.Nombre,
-                m.Dosis,
-                m.LabTitular,
-                m.Generico,
-                m.Receta
-            })
+            .Skip(offset)
             .Take(limit)
+            .Select(m => new {
+                nregistro = m.NRegistro,
+                nombre = m.Nombre,
+                dosis = m.Dosis,
+                laboratorio = m.LabTitular,
+                generico = m.Generico,
+                receta = m.Receta,
+                comercializado = true // Por ahora todos true, después se puede mejorar
+            })
             .ToListAsync(ct);
 
-        return Ok(new { total = list.Count, resultados = list });
+        return Ok(new { 
+            total = total,
+            count = resultados.Count,
+            offset = offset,
+            limit = limit,
+            results = resultados 
+        });
     }
 
     /// <summary>

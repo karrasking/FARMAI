@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Pill, Package, Microscope, AlertTriangle, Building2, Beaker, Activity, FileText } from 'lucide-react'
 import { Line, Bar, Doughnut, Radar } from 'react-chartjs-2'
@@ -32,16 +33,11 @@ ChartJS.register(
   Filler
 )
 
-// Mock data - En producción vendría del API
-const kpis = {
-  medicamentos: 20271,
-  presentaciones: 29540,
-  principiosActivos: 4885,
-  interacciones: 52325,
-  laboratorios: 1351,
-  excipientes: 574,
-  biomarcadores: 47,
-  documentos: 309,
+// Fetch real data from API
+const fetchKpis = async () => {
+  const response = await fetch('http://localhost:5265/api/dashboard/kpis')
+  if (!response.ok) throw new Error('Error fetching KPIs')
+  return response.json()
 }
 
 const growthData = {
@@ -98,6 +94,35 @@ const latestUpdates = [
 ]
 
 export function DashboardPage() {
+  // Consumir el API real
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['dashboard-kpis'],
+    queryFn: fetchKpis,
+    refetchInterval: 30000 // Actualizar cada 30 segundos
+  })
+
+  // Usar datos del API o valores por defecto mientras carga
+  const kpis = data || {
+    medicamentos: 0,
+    presentaciones: 0,
+    principiosActivos: 0,
+    interacciones: 0,
+    laboratorios: 0,
+    excipientes: 0,
+    biomarcadores: 0,
+    documentos: 0,
+    grafo: { totalNodos: 0, totalAristas: 0 }
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-2xl font-bold text-red-600">Error al cargar los datos</h2>
+        <p className="mt-2 text-gray-600">Por favor, asegúrate de que el API esté ejecutándose</p>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-8">
       {/* Page Title */}
@@ -121,27 +146,31 @@ export function DashboardPage() {
           </Card>
         </Link>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Presentaciones</CardTitle>
-            <Package className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kpis.presentaciones.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">Diferentes formatos</p>
-          </CardContent>
-        </Card>
+        <Link to="/search?filter=presentaciones">
+          <Card className="cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Presentaciones</CardTitle>
+              <Package className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{kpis.presentaciones.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">Diferentes formatos</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Principios Activos</CardTitle>
-            <Microscope className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kpis.principiosActivos.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">Componentes únicos</p>
-          </CardContent>
-        </Card>
+        <Link to="/search?filter=principios-activos">
+          <Card className="cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Principios Activos</CardTitle>
+              <Microscope className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{kpis.principiosActivos.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">Componentes únicos</p>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -154,38 +183,44 @@ export function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Laboratorios</CardTitle>
-            <Building2 className="h-4 w-4 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kpis.laboratorios.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">Fabricantes registrados</p>
-          </CardContent>
-        </Card>
+        <Link to="/search?filter=laboratorios">
+          <Card className="cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Laboratorios</CardTitle>
+              <Building2 className="h-4 w-4 text-orange-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{kpis.laboratorios.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">Fabricantes registrados</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Excipientes</CardTitle>
-            <Beaker className="h-4 w-4 text-cyan-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kpis.excipientes.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">Componentes auxiliares</p>
-          </CardContent>
-        </Card>
+        <Link to="/search?filter=excipientes">
+          <Card className="cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Excipientes</CardTitle>
+              <Beaker className="h-4 w-4 text-cyan-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{kpis.excipientes.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">Componentes auxiliares</p>
+            </CardContent>
+          </Card>
+        </Link>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Biomarcadores</CardTitle>
-            <Activity className="h-4 w-4 text-pink-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kpis.biomarcadores.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">Marcadores biológicos</p>
-          </CardContent>
-        </Card>
+        <Link to="/search?filter=biomarcadores">
+          <Card className="cursor-pointer hover:shadow-lg hover:scale-105 transition-all duration-200">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Biomarcadores</CardTitle>
+              <Activity className="h-4 w-4 text-pink-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{kpis.biomarcadores.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">Marcadores biológicos</p>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

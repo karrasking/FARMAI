@@ -10,6 +10,17 @@ var builder = WebApplication.CreateBuilder(args);
 var conn = builder.Configuration.GetConnectionString("Postgres");
 builder.Services.AddDbContext<FarmaiDbContext>(opt => opt.UseNpgsql(conn));
 
+// CORS para Dashboard React
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowDashboard", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 // Servicios API + Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -41,6 +52,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Habilitar CORS
+app.UseCors("AllowDashboard");
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
