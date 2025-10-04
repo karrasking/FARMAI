@@ -6,7 +6,8 @@
 [![Estado](https://img.shields.io/badge/Estado-Producción-success)](.)
 [![Cobertura](https://img.shields.io/badge/Cobertura-100%25%20Medicamentos%20España-blue)](.)
 [![Grafo](https://img.shields.io/badge/Grafo-830K%20relaciones-purple)](.)
-[![Actualización](https://img.shields.io/badge/Última%20Actualización-10%2F03%2F2025-orange)](.)
+[![Dashboard](https://img.shields.io/badge/Dashboard-React%2018-61DAFB)](./)
+[![Actualización](https://img.shields.io/badge/Última%20Actualización-04%2F10%2F2025-orange)](.)
 
 ---
 
@@ -18,9 +19,10 @@
 5. [Fuentes de Datos](#-fuentes-de-datos)
 6. [Instalación y Configuración](#-instalación-y-configuración)
 7. [Uso de la API](#-uso-de-la-api)
-8. [Scripts y Mantenimiento](#-scripts-y-mantenimiento)
-9. [Documentación Técnica](#-documentación-técnica)
-10. [Estado del Proyecto](#-estado-del-proyecto)
+8. [Dashboard Administrativo](#-dashboard-administrativo)
+9. [Scripts y Mantenimiento](#-scripts-y-mantenimiento)
+10. [Documentación Técnica](#-documentación-técnica)
+11. [Estado del Proyecto](#-estado-del-proyecto)
 
 ---
 
@@ -389,6 +391,86 @@ curl -X POST http://localhost:5000/api/medicamentos/interacciones \
 
 ---
 
+## 🎨 Dashboard Administrativo
+
+### Interfaz Web Moderna
+
+FARMAI incluye un **dashboard administrativo profesional** construido con tecnologías modernas:
+
+**Stack Tecnológico:**
+- ✅ React 18 + TypeScript 5
+- ✅ Vite (build ultra-rápido)
+- ✅ Tailwind CSS 3 (diseño responsive)
+- ✅ Chart.js (gráficas interactivas)
+- ✅ TanStack Query (gestión de estado)
+- ✅ Lucide React (iconografía moderna)
+
+### Características del Dashboard
+
+#### 📊 **Página Principal - Dashboard**
+- **8 KPIs en tiempo real:**
+  - Medicamentos (20,271)
+  - Presentaciones (29,540)
+  - Principios Activos (4,885)
+  - Interacciones (52,325)
+  - Laboratorios (1,351)
+  - Excipientes (574)
+  - Biomarcadores (47)
+  - Documentos (309)
+
+- **4 Gráficas Interactivas:**
+  - Crecimiento mensual de medicamentos
+  - Top 10 laboratorios por volumen
+  - Distribución de alertas de seguridad
+  - Estado del grafo de conocimiento
+
+- **Tabla de Actualizaciones Recientes**
+
+#### 🔄 **Página de Sincronización**
+- Control de sincronización diaria (incremental)
+- Control de sincronización mensual (XML completo)
+- Activación/desactivación de tareas
+- Historial completo de ejecuciones
+- Métricas de rendimiento por sincronización
+
+#### 🔍 **Buscador de Medicamentos**
+- Búsqueda en tiempo real
+- Filtros avanzados:
+  - Por tipo (Genérico / No genérico)
+  - Por requisito de receta
+- Resultados con badges informativos
+- Acciones rápidas (Ver detalle, Ficha técnica)
+
+### Instalación del Dashboard
+
+```bash
+# Navegar al directorio
+cd farmai-dashboard
+
+# Instalar dependencias
+npm install
+
+# Iniciar servidor de desarrollo
+npm run dev
+
+# Abrir en navegador
+# http://localhost:5173
+```
+
+### Estado del Dashboard
+
+🟢 **COMPLETO** (con datos de ejemplo)
+- ✅ 3 páginas funcionales
+- ✅ Diseño responsive
+- ✅ UI/UX profesional
+- ✅ Listo para conectar al backend real
+
+**Próximo paso:** Conectar endpoints del API REST para datos en tiempo real.
+
+**Ver más:** [farmai-dashboard/README.md](farmai-dashboard/README.md)
+
+---
+
 ## 🛠️ Scripts y Mantenimiento
 
 ### Scripts de Propagación (39 archivos SQL)
@@ -534,4 +616,4 @@ Este proyecto está bajo licencia MIT. Ver archivo [LICENSE](LICENSE) para más 
 
 **⚡ FARMAI - Transformando la información farmacéutica en conocimiento accionable**
 
-*Última actualización: 10/03/2025*
+*Última actualización: 04/10/2025*
