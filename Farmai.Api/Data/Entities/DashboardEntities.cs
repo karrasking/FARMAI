@@ -51,8 +51,23 @@ public class Excipiente
 public class Biomarcador
 {
     [Key]
-    public int Id { get; set; }
-    public string? Gen { get; set; }
+    public long Id { get; set; }
+    
+    [Required]
+    [MaxLength(256)]
+    public string Nombre { get; set; } = string.Empty;
+    
+    [MaxLength(256)]
+    public string? NombreCanon { get; set; }
+    
+    [Required]
+    [MaxLength(50)]
+    public string Tipo { get; set; } = string.Empty;  // "Germinal" o "Somático"
+    
+    public string? Descripcion { get; set; }
+    
+    [Column(TypeName = "jsonb")]
+    public string? CodigoExt { get; set; }
 }
 
 [Table("Documento")]

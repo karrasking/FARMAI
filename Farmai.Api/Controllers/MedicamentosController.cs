@@ -52,13 +52,36 @@ public class MedicamentosController : ControllerBase
         // Construir query base
         var query = _db.Medicamentos.AsQueryable();
 
-        // Aplicar filtro de texto si existe
+        // Aplicar filtro de texto si existe - BÚSQUEDA MULTI-CRITERIO COMPLETA
         if (!string.IsNullOrWhiteSpace(q))
         {
             query = query.Where(m =>
+                // Búsqueda tradicional
                 EF.Functions.ILike(m.Nombre, $"%{q}%") ||
                 EF.Functions.ILike(m.LabTitular!, $"%{q}%") ||
-                m.NRegistro!.Contains(q)
+                m.NRegistro!.Contains(q) ||
+                // ✨ NUEVO: Búsqueda por Código Nacional (CN)
+                _db.Presentacion.Any(p => p.CN.Contains(q) && 
+                    _db.Medicamentos.Any(med => med.NRegistro == m.NRegistro && 
+                        EF.Functions.JsonContains(med.RawJson, $"\"cn\":\"{p.CN}\""))) ||
+                // ✨ NUEVO: Búsqueda por Principio Activo
+                _db.MedicamentoSustancia
+                    .Where(ms => ms.NRegistro == m.NRegistro)
+                    .Join(_db.SustanciaActiva, 
+                        ms => ms.SustanciaId, 
+                        sa => sa.Id, 
+                        (ms, sa) => sa.Nombre)
+                    .Any(nombre => EF.Functions.ILike(nombre!, $"%{q}%")) ||
+                // ✨ NUEVO: Búsqueda por Excipiente
+                _db.MedicamentoExcipiente
+                    .Where(me => me.NRegistro == m.NRegistro)
+                    .Join(_db.Excipiente,
+                        me => me.ExcipienteId,
+                        e => e.Id,
+                        (me, e) => e.Nombre)
+                    .Any(nombre => EF.Functions.ILike(nombre!, $"%{q}%"))
+                // Biomarcadores temporalmente desactivado por permisos
+                // TODO: Activar cuando tengamos permisos correctos
             );
         }
 

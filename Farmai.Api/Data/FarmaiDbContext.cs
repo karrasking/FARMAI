@@ -25,6 +25,7 @@ public class FarmaiDbContext(DbContextOptions<FarmaiDbContext> options) : DbCont
     // Entidades de composición (para fallback cuando JSON está vacío)
     public DbSet<MedicamentoSustancia> MedicamentoSustancia => Set<MedicamentoSustancia>();
     public DbSet<MedicamentoExcipiente> MedicamentoExcipiente => Set<MedicamentoExcipiente>();
+    public DbSet<MedicamentoBiomarcador> MedicamentoBiomarcador => Set<MedicamentoBiomarcador>();
     public DbSet<MedicamentoAtc> MedicamentoAtc => Set<MedicamentoAtc>();
     public DbSet<Atc> Atc => Set<Atc>();
     public DbSet<Vtm> Vtm => Set<Vtm>();
@@ -81,6 +82,11 @@ public class FarmaiDbContext(DbContextOptions<FarmaiDbContext> options) : DbCont
         modelBuilder.Entity<MedicamentoExcipiente>()
             .ToTable("MedicamentoExcipiente")
             .HasKey(x => new { x.NRegistro, x.ExcipienteId });
+        
+        // Configuración de MedicamentoBiomarcador (clave compuesta)
+        modelBuilder.Entity<MedicamentoBiomarcador>()
+            .ToTable("MedicamentoBiomarcador")
+            .HasKey(x => new { x.NRegistro, x.BiomarcadorId });
         
         // Configuración de MedicamentoAtc (clave compuesta)
         modelBuilder.Entity<MedicamentoAtc>()
