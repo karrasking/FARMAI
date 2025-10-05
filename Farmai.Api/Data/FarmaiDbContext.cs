@@ -22,6 +22,10 @@ public class FarmaiDbContext(DbContextOptions<FarmaiDbContext> options) : DbCont
     public DbSet<GraphNode> GraphNode => Set<GraphNode>();
     public DbSet<GraphEdge> GraphEdge => Set<GraphEdge>();
     
+    // Entidades de composición (para fallback cuando JSON está vacío)
+    public DbSet<MedicamentoSustancia> MedicamentoSustancia => Set<MedicamentoSustancia>();
+    public DbSet<MedicamentoExcipiente> MedicamentoExcipiente => Set<MedicamentoExcipiente>();
+    
     // Entidades para descarga de documentos
     public DbSet<DocumentDownloadBatch> DocumentDownloadBatch => Set<DocumentDownloadBatch>();
     public DbSet<DocumentDownloadLog> DocumentDownloadLog => Set<DocumentDownloadLog>();
@@ -62,6 +66,16 @@ public class FarmaiDbContext(DbContextOptions<FarmaiDbContext> options) : DbCont
         modelBuilder.Entity<Excipiente>().ToTable("Excipiente").HasKey(x => x.Id);
         modelBuilder.Entity<Biomarcador>().ToTable("Biomarcador").HasKey(x => x.Id);
         modelBuilder.Entity<Documento>().ToTable("Documento").HasKey(x => x.Id);
+        
+        // Configuración de MedicamentoSustancia (clave compuesta) - SIN relaciones para evitar problemas
+        modelBuilder.Entity<MedicamentoSustancia>()
+            .ToTable("MedicamentoSustancia")
+            .HasKey(x => new { x.NRegistro, x.SustanciaId });
+        
+        // Configuración de MedicamentoExcipiente (clave compuesta) - SIN relaciones para evitar problemas  
+        modelBuilder.Entity<MedicamentoExcipiente>()
+            .ToTable("MedicamentoExcipiente")
+            .HasKey(x => new { x.NRegistro, x.ExcipienteId });
         
         // Configuración del grafo
         modelBuilder.Entity<GraphNode>().ToTable("graph_node").HasKey(x => new { x.NodeType, x.NodeKey });

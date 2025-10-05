@@ -237,7 +237,7 @@ public class MedicamentosController : ControllerBase
                 }
             }
 
-            // Principios activos
+            // Principios activos - Intentar JSON primero, fallback a tablas relacionales
             if (root.TryGetProperty("principiosActivos", out var pas) && pas.ValueKind == JsonValueKind.Array)
             {
                 foreach (var pa in pas.EnumerateArray())
@@ -251,8 +251,27 @@ public class MedicamentosController : ControllerBase
                     });
                 }
             }
+            
+            // FALLBACK: Si JSON está vacío, leer desde tablas relacionales con JOIN manual
+            if (detalle.PrincipiosActivos.Count == 0)
+            {
+                var pasFromDb = await (from ms in _db.MedicamentoSustancia
+                    join sa in _db.SustanciaActiva on ms.SustanciaId equals sa.Id into saJoin
+                    from sa in saJoin.DefaultIfEmpty()
+                    where ms.NRegistro == nregistro
+                    orderby ms.Orden
+                    select new PrincipioActivoDto
+                    {
+                        Id = (int)ms.SustanciaId,
+                        Nombre = sa != null ? sa.Nombre ?? "" : "",
+                        Cantidad = ms.Cantidad,
+                        Unidad = ms.Unidad
+                    }).ToListAsync(ct);
+                
+                detalle.PrincipiosActivos.AddRange(pasFromDb);
+            }
 
-            // Excipientes con detección de alérgenos
+            // Excipientes con detección de alérgenos - Intentar JSON primero, fallback a tablas relacionales
             if (root.TryGetProperty("excipientes", out var excs) && excs.ValueKind == JsonValueKind.Array)
             {
                 foreach (var exc in excs.EnumerateArray())
@@ -275,6 +294,49 @@ public class MedicamentosController : ControllerBase
                         Cantidad = exc.TryGetProperty("cantidad", out var cant) ? cant.GetString() : null,
                         Unidad = exc.TryGetProperty("unidad", out var unidad) ? unidad.GetString() : null,
                         Orden = exc.TryGetProperty("orden", out var orden) ? orden.GetInt32() : 0,
+                        EsAlergeno = esAlergeno,
+                        TipoAlergeno = tipoAlergeno
+                    });
+                }
+            }
+            
+            // FALLBACK: Si JSON está vacío, leer desde tablas relacionales con JOIN manual
+            if (detalle.Excipientes.Count == 0)
+            {
+                var excsFromDb = await (from me in _db.MedicamentoExcipiente
+                    join exc in _db.Excipiente on me.ExcipienteId equals exc.Id into excJoin
+                    from exc in excJoin.DefaultIfEmpty()
+                    where me.NRegistro == nregistro
+                    orderby me.Orden
+                    select new 
+                    {
+                        me.ExcipienteId,
+                        Nombre = exc != null ? exc.Nombre ?? "" : "",
+                        me.Cantidad,
+                        me.Unidad,
+                        me.Orden
+                    }).ToListAsync(ct);
+                
+                foreach (var me in excsFromDb)
+                {
+                    var nombreExc = me.Nombre;
+                    var nombreUpper = nombreExc.ToUpperInvariant();
+                    
+                    string? tipoAlergeno = null;
+                    var esAlergeno = false;
+                    
+                    if (nombreUpper.Contains("LACTOSA")) { esAlergeno = true; tipoAlergeno = "lactosa"; }
+                    else if (nombreUpper.Contains("GLUTEN") || nombreUpper.Contains("TRIGO")) { esAlergeno = true; tipoAlergeno = "gluten"; }
+                    else if (nombreUpper.Contains("SOJA")) { esAlergeno = true; tipoAlergeno = "soja"; }
+                    else if (nombreUpper.Contains("CACAHU")) { esAlergeno = true; tipoAlergeno = "cacahuete"; }
+                    
+                    detalle.Excipientes.Add(new ExcipienteDto
+                    {
+                        Id = (int)me.ExcipienteId,
+                        Nombre = nombreExc,
+                        Cantidad = me.Cantidad,
+                        Unidad = me.Unidad,
+                        Orden = me.Orden,
                         EsAlergeno = esAlergeno,
                         TipoAlergeno = tipoAlergeno
                     });
