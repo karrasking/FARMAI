@@ -19,6 +19,18 @@ export default function GeneralTab({ medicamento }: GeneralTabProps) {
             <dt className="text-sm font-medium text-gray-500">N° Registro</dt>
             <dd className="mt-1 text-sm text-gray-900 font-mono">{medicamento.nregistro}</dd>
           </div>
+          {medicamento.presentaciones.length > 0 && (
+            <div>
+              <dt className="text-sm font-medium text-gray-500">Código(s) Nacional (CN)</dt>
+              <dd className="mt-1 flex flex-wrap gap-1">
+                {medicamento.presentaciones.map((pres, idx) => (
+                  <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium bg-indigo-100 text-indigo-800">
+                    {pres.cn}
+                  </span>
+                ))}
+              </dd>
+            </div>
+          )}
           <div>
             <dt className="text-sm font-medium text-gray-500">Nombre Completo</dt>
             <dd className="mt-1 text-sm text-gray-900 font-semibold">{medicamento.nombre}</dd>

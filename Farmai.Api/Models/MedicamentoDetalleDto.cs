@@ -49,6 +49,9 @@ public class MedicamentoDetalleDto
     
     // Extra
     public List<FlagDto> Flags { get; set; } = new();
+    
+    // 🧬 Biomarcadores (Farmacogenómica)
+    public List<BiomarcadorDto> Biomarcadores { get; set; } = new();
 }
 
 public class AtcDto
@@ -135,4 +138,23 @@ public class FlagDto
     public string Codigo { get; set; } = string.Empty;
     public string Nombre { get; set; } = string.Empty;
     public string Descripcion { get; set; } = string.Empty;
+}
+
+// DTO para Biomarcadores (Farmacogenómica)
+public class BiomarcadorDto 
+{
+    public int Id { get; set; }
+    public string Nombre { get; set; } = "";
+    public string? NombreCanon { get; set; }
+    public string Tipo { get; set; } = "";
+    public bool IncluidoSns { get; set; }
+    public string ClaseBiomarcador { get; set; } = "";  // "Germinal" | "Somático"
+    
+    // Información de la relación medicamento-biomarcador
+    public string TipoRelacion { get; set; } = "";  // "ajuste_dosis"
+    public string Evidencia { get; set; } = "";  // Texto largo ⭐
+    public int NivelEvidencia { get; set; }  // 4
+    public string Fuente { get; set; } = "";  // "AEMPS XML"
+    public List<string> SeccionesFt { get; set; } = new();  // ["4.2", "4.5"]
+    public string? Notas { get; set; }
 }

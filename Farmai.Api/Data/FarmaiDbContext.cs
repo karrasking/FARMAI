@@ -26,6 +26,7 @@ public class FarmaiDbContext(DbContextOptions<FarmaiDbContext> options) : DbCont
     public DbSet<MedicamentoSustancia> MedicamentoSustancia => Set<MedicamentoSustancia>();
     public DbSet<MedicamentoExcipiente> MedicamentoExcipiente => Set<MedicamentoExcipiente>();
     public DbSet<MedicamentoBiomarcador> MedicamentoBiomarcador => Set<MedicamentoBiomarcador>();
+    public DbSet<MedicamentoPresentacion> MedicamentoPresentacion => Set<MedicamentoPresentacion>();
     public DbSet<MedicamentoAtc> MedicamentoAtc => Set<MedicamentoAtc>();
     public DbSet<Atc> Atc => Set<Atc>();
     public DbSet<Vtm> Vtm => Set<Vtm>();
@@ -87,6 +88,11 @@ public class FarmaiDbContext(DbContextOptions<FarmaiDbContext> options) : DbCont
         modelBuilder.Entity<MedicamentoBiomarcador>()
             .ToTable("MedicamentoBiomarcador")
             .HasKey(x => new { x.NRegistro, x.BiomarcadorId });
+        
+        // Configuración de MedicamentoPresentacion (clave compuesta)
+        modelBuilder.Entity<MedicamentoPresentacion>()
+            .ToTable("MedicamentoPresentacion")
+            .HasKey(x => new { x.NRegistro, x.CN });
         
         // Configuración de MedicamentoAtc (clave compuesta)
         modelBuilder.Entity<MedicamentoAtc>()

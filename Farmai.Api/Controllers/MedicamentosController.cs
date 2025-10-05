@@ -60,10 +60,14 @@ public class MedicamentosController : ControllerBase
                 EF.Functions.ILike(m.Nombre, $"%{q}%") ||
                 EF.Functions.ILike(m.LabTitular!, $"%{q}%") ||
                 m.NRegistro!.Contains(q) ||
-                // ✨ NUEVO: Búsqueda por Código Nacional (CN)
-                _db.Presentacion.Any(p => p.CN.Contains(q) && 
-                    _db.Medicamentos.Any(med => med.NRegistro == m.NRegistro && 
-                        EF.Functions.JsonContains(med.RawJson, $"\"cn\":\"{p.CN}\""))) ||
+                // ✨ NUEVO: Búsqueda por Código Nacional (CN) usando tabla MedicamentoPresentacion
+                _db.MedicamentoPresentacion
+                    .Where(mp => mp.NRegistro == m.NRegistro)
+                    .Join(_db.Presentacion,
+                        mp => mp.CN,
+                        p => p.CN,
+                        (mp, p) => p.CN)
+                    .Any(cn => cn.Contains(q)) ||
                 // ✨ NUEVO: Búsqueda por Principio Activo
                 _db.MedicamentoSustancia
                     .Where(ms => ms.NRegistro == m.NRegistro)
@@ -79,9 +83,15 @@ public class MedicamentosController : ControllerBase
                         me => me.ExcipienteId,
                         e => e.Id,
                         (me, e) => e.Nombre)
+                    .Any(nombre => EF.Functions.ILike(nombre!, $"%{q}%")) ||
+                // ✨ NUEVO: Búsqueda por Biomarcador (Farmacogenómica) - REACTIVADO ✅
+                _db.MedicamentoBiomarcador
+                    .Where(mb => mb.NRegistro == m.NRegistro)
+                    .Join(_db.Biomarcador,
+                        mb => mb.BiomarcadorId,
+                        b => b.Id,
+                        (mb, b) => b.Nombre)
                     .Any(nombre => EF.Functions.ILike(nombre!, $"%{q}%"))
-                // Biomarcadores temporalmente desactivado por permisos
-                // TODO: Activar cuando tengamos permisos correctos
             );
         }
 
@@ -530,6 +540,67 @@ public class MedicamentosController : ControllerBase
                         }
                     }
                 }
+            }
+
+            // 🧬 Biomarcadores (Farmacogenómica)
+            var biomarcadoresFromDb = await (from mb in _db.MedicamentoBiomarcador
+                join b in _db.Biomarcador on mb.BiomarcadorId equals b.Id
+                where mb.NRegistro == nregistro
+                select new 
+                {
+                    Biomarcador = b,
+                    Relacion = mb
+                }).ToListAsync(ct);
+            
+            foreach (var bioData in biomarcadoresFromDb)
+            {
+                // Parsear Descripcion: "Clase: Germinal | Inclusión SNS: True"
+                var desc = bioData.Biomarcador.Descripcion ?? "";
+                var incluidoSns = desc.Contains("Inclusión SNS: True", StringComparison.OrdinalIgnoreCase);
+                var claseStart = desc.IndexOf("Clase:", StringComparison.OrdinalIgnoreCase);
+                var clasePipe = desc.IndexOf("|", claseStart);
+                var claseBiomarcador = "";
+                if (claseStart >= 0 && clasePipe > claseStart)
+                {
+                    claseBiomarcador = desc.Substring(claseStart + 6, clasePipe - claseStart - 6).Trim();
+                }
+                
+                // Parsear FuenteUrl: "4.2 Posología|4.5 Interacciones"
+                var seccionesFt = new List<string>();
+                if (!string.IsNullOrEmpty(bioData.Relacion.FuenteUrl))
+                {
+                    var secciones = bioData.Relacion.FuenteUrl.Split('|', StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var seccion in secciones)
+                    {
+                        var seccionTrimmed = seccion.Trim();
+                        // Extraer solo el número de sección (ej: "4.2" de "4.2 Posología")
+                        var spaceIndex = seccionTrimmed.IndexOf(' ');
+                        if (spaceIndex > 0)
+                        {
+                            seccionesFt.Add(seccionTrimmed.Substring(0, spaceIndex));
+                        }
+                        else
+                        {
+                            seccionesFt.Add(seccionTrimmed);
+                        }
+                    }
+                }
+                
+                detalle.Biomarcadores.Add(new BiomarcadorDto
+                {
+                    Id = (int)bioData.Biomarcador.Id,
+                    Nombre = bioData.Biomarcador.Nombre,
+                    NombreCanon = bioData.Biomarcador.NombreCanon,
+                    Tipo = bioData.Biomarcador.Tipo,
+                    IncluidoSns = incluidoSns,
+                    ClaseBiomarcador = claseBiomarcador,
+                    TipoRelacion = bioData.Relacion.TipoRelacion,
+                    Evidencia = bioData.Relacion.Evidencia ?? "",
+                    NivelEvidencia = bioData.Relacion.NivelEvidencia ?? 0,
+                    Fuente = bioData.Relacion.Fuente ?? "",
+                    SeccionesFt = seccionesFt,
+                    Notas = bioData.Relacion.Notas
+                });
             }
 
             return Ok(detalle);

@@ -130,10 +130,22 @@ export interface AlertaGeriatria {
   severidad: 'alta' | 'media' | 'baja';
 }
 
+// 🧬 Biomarcador (Farmacogenómica) - Versión completa
 export interface Biomarcador {
-  gen: string;
-  descripcion: string;
-  impacto: string;
+  id: number;
+  nombre: string;
+  nombreCanon?: string;
+  tipo: string;
+  incluidoSns: boolean;
+  claseBiomarcador: string;  // "Germinal" | "Somático"
+  
+  // Información de la relación
+  tipoRelacion: string;  // "ajuste_dosis"
+  evidencia: string;  // Texto largo
+  nivelEvidencia: number;
+  fuente: string;
+  seccionesFt: string[];  // ["4.2", "4.5"]
+  notas?: string;
 }
 
 export interface Flag {

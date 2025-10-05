@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Pill, FileText, ShieldAlert, Package, FileCheck, Info, Download, Printer } from 'lucide-react';
+import { X, Pill, FileText, ShieldAlert, Package, FileCheck, Info, Download, Printer, Dna } from 'lucide-react';
 import type { MedicamentoDetalle } from '../types/medicamento';
 import {
   GeneralTab,
@@ -7,6 +7,7 @@ import {
   SeguridadTab,
   PresentacionesTab,
   DocumentosTab,
+  FarmacogenomicaTab,
   MasInfoTab
 } from './medicamento-tabs';
 
@@ -16,7 +17,7 @@ interface MedicamentoDetailModalProps {
   onClose: () => void;
 }
 
-type TabType = 'general' | 'composicion' | 'seguridad' | 'presentaciones' | 'documentos' | 'mas';
+type TabType = 'general' | 'composicion' | 'seguridad' | 'presentaciones' | 'documentos' | 'farmacogenomica' | 'mas';
 
 const tabs = [
   { id: 'general' as TabType, label: 'General', icon: Pill },
@@ -24,6 +25,7 @@ const tabs = [
   { id: 'seguridad' as TabType, label: 'Seguridad', icon: ShieldAlert },
   { id: 'presentaciones' as TabType, label: 'Presentaciones', icon: Package },
   { id: 'documentos' as TabType, label: 'Documentos', icon: FileCheck },
+  { id: 'farmacogenomica' as TabType, label: 'Farmacogenómica', icon: Dna },
   { id: 'mas' as TabType, label: 'Más Info', icon: Info },
 ];
 
@@ -119,8 +121,8 @@ export default function MedicamentoDetailModal({ medicamento, isOpen, onClose }:
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-200 flex-shrink-0 overflow-x-auto">
-          <nav className="flex space-x-1 px-6" aria-label="Tabs">
+        <div className="border-b border-gray-200 flex-shrink-0">
+          <nav className="flex flex-wrap gap-1 px-6 py-2" aria-label="Tabs">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -130,10 +132,10 @@ export default function MedicamentoDetailModal({ medicamento, isOpen, onClose }:
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap
+                    flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg transition-all whitespace-nowrap
                     ${isActive
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'bg-blue-50 text-blue-600 border-b-2 border-blue-500'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                     }
                   `}
                   aria-current={isActive ? 'page' : undefined}
@@ -153,6 +155,7 @@ export default function MedicamentoDetailModal({ medicamento, isOpen, onClose }:
           {activeTab === 'seguridad' && <SeguridadTab medicamento={medicamento} />}
           {activeTab === 'presentaciones' && <PresentacionesTab medicamento={medicamento} />}
           {activeTab === 'documentos' && <DocumentosTab medicamento={medicamento} />}
+          {activeTab === 'farmacogenomica' && <FarmacogenomicaTab medicamento={medicamento} />}
           {activeTab === 'mas' && <MasInfoTab medicamento={medicamento} />}
         </div>
 
