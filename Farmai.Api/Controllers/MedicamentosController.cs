@@ -87,7 +87,7 @@ public class MedicamentosController : ControllerBase
                 laboratorioComercializador = m.LaboratorioComercializador != null ? m.LaboratorioComercializador.Nombre : null,
                 generico = m.Generico,
                 receta = m.Receta,
-                comercializado = true // Por ahora todos true, después se puede mejorar
+                comercializado = m.Comercializado ?? true
             })
             .ToListAsync(ct);
 
