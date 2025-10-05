@@ -28,6 +28,7 @@ public class Medicamento
     public bool? Receta { get; set; }
     public bool? Generico { get; set; }
     public bool? Comercializado { get; set; }
+    public bool? Biosimilar { get; set; }
 
     [MaxLength(128)]
     public string? Dosis { get; set; }

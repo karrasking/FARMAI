@@ -28,6 +28,9 @@ public class MedicamentosController : ControllerBase
     /// <param name="q">Texto a buscar (nombre, laboratorio, nregistro) - OPCIONAL</param>
     /// <param name="generico">Filtrar por genérico: true/false - OPCIONAL</param>
     /// <param name="receta">Filtrar por receta: true/false - OPCIONAL</param>
+    /// <param name="comercializado">Filtrar por medicamentos comercializados: true/false - OPCIONAL</param>
+    /// <param name="biosimilar">Filtrar por medicamentos biosimilares: true/false - OPCIONAL</param>
+    /// <param name="hospitalario">Filtrar por uso hospitalario: true/false - OPCIONAL</param>
     /// <param name="limit">Límite de resultados (por defecto 50, máx 200)</param>
     /// <param name="offset">Offset para paginación (por defecto 0)</param>
     [HttpGet("search")]
@@ -35,6 +38,9 @@ public class MedicamentosController : ControllerBase
         [FromQuery] string? q, 
         [FromQuery] bool? generico,
         [FromQuery] bool? receta,
+        [FromQuery] bool? comercializado,
+        [FromQuery] bool? biosimilar,
+        [FromQuery] bool? hospitalario,
         [FromQuery] int limit = 50, 
         [FromQuery] int offset = 0,
         CancellationToken ct = default)
@@ -68,6 +74,33 @@ public class MedicamentosController : ControllerBase
             query = query.Where(m => m.Receta == receta.Value);
         }
 
+        // Aplicar filtro de comercializado
+        if (comercializado.HasValue)
+        {
+            query = query.Where(m => m.Comercializado == comercializado.Value);
+        }
+
+        // Aplicar filtro de biosimilar
+        if (biosimilar.HasValue)
+        {
+            query = query.Where(m => m.Biosimilar == biosimilar.Value);
+        }
+
+        // Aplicar filtro de hospitalario (desde JSON)
+        if (hospitalario.HasValue)
+        {
+            if (hospitalario.Value)
+            {
+                // Buscar medicamentos con "Uso Hospitalario" en JSON
+                query = query.Where(m => EF.Functions.ILike(m.RawJson, "%Uso Hospitalario%"));
+            }
+            else
+            {
+                // Buscar medicamentos SIN uso hospitalario
+                query = query.Where(m => !EF.Functions.ILike(m.RawJson, "%Uso Hospitalario%"));
+            }
+        }
+
         // Obtener total antes de paginar
         var total = await query.CountAsync(ct);
 
@@ -87,7 +120,8 @@ public class MedicamentosController : ControllerBase
                 laboratorioComercializador = m.LaboratorioComercializador != null ? m.LaboratorioComercializador.Nombre : null,
                 generico = m.Generico,
                 receta = m.Receta,
-                comercializado = m.Comercializado ?? true
+                comercializado = m.Comercializado ?? true,
+                biosimilar = m.Biosimilar ?? false
             })
             .ToListAsync(ct);
 
@@ -200,7 +234,7 @@ public class MedicamentosController : ControllerBase
                 Interacciones = 0 // TODO: calcular from grafo
             };
 
-            // Parsear ATC
+            // Parsear ATC con parsing defensivo
             if (root.TryGetProperty("atcs", out var atcs) && atcs.ValueKind == JsonValueKind.Array)
             {
                 foreach (var atc in atcs.EnumerateArray())
@@ -209,32 +243,104 @@ public class MedicamentosController : ControllerBase
                     {
                         Codigo = atc.TryGetProperty("codigo", out var codigo) ? codigo.GetString() ?? "" : "",
                         Nombre = atc.TryGetProperty("nombre", out var nombre) ? nombre.GetString() ?? "" : "",
-                        Nivel = atc.TryGetProperty("nivel", out var nivel) ? nivel.GetInt32() : 0
+                        Nivel = atc.TryGetProperty("nivel", out var nivel) && nivel.ValueKind == JsonValueKind.Number ? nivel.GetInt32() : 0
                     });
                 }
             }
-
-            // VTM
-            if (root.TryGetProperty("vtm", out var vtm))
+            
+            // FALLBACK ATCs: Si JSON está vacío, leer desde tablas relacionales
+            if (detalle.Atc.Count == 0)
             {
-                detalle.Vtm = new VtmDto
-                {
-                    Id = vtm.TryGetProperty("id", out var id) ? id.GetInt32() : 0,
-                    Nombre = vtm.TryGetProperty("nombre", out var nombre) ? nombre.GetString() ?? "" : ""
-                };
+                var atcsFromDb = await (from ma in _db.MedicamentoAtc
+                    join a in _db.Atc on ma.Codigo equals a.Codigo into atcJoin
+                    from a in atcJoin.DefaultIfEmpty()
+                    where ma.NRegistro == nregistro
+                    select new AtcDto
+                    {
+                        Codigo = ma.Codigo,
+                        Nombre = a != null ? a.Nombre : "",
+                        Nivel = a != null ? a.Nivel : (short)0
+                    }).ToListAsync(ct);
+                
+                detalle.Atc.AddRange(atcsFromDb);
             }
 
-            // Vías de administración
+            // VTM con parsing defensivo
+            if (root.TryGetProperty("vtm", out var vtm) && vtm.ValueKind == JsonValueKind.Object)
+            {
+                var vtmId = vtm.TryGetProperty("id", out var id) && id.ValueKind == JsonValueKind.Number ? id.GetInt64() : 0L;
+                var vtmNombre = vtm.TryGetProperty("nombre", out var nombre) ? nombre.GetString() ?? "" : "";
+                
+                if (vtmId > 0)
+                {
+                    detalle.Vtm = new VtmDto
+                    {
+                        Id = (int)vtmId,
+                        Nombre = vtmNombre
+                    };
+                }
+            }
+            
+            // FALLBACK VTM: Si no hay VTM del JSON, intentar buscar en tabla Vtm
+            if (detalle.Vtm == null)
+            {
+                var vtmFromDb = await (from m in _db.Medicamentos
+                    where m.NRegistro == nregistro && m.RawJson != null
+                    select m.RawJson).FirstOrDefaultAsync(ct);
+                
+                if (!string.IsNullOrEmpty(vtmFromDb))
+                {
+                    try
+                    {
+                        var vtmJson = JsonDocument.Parse(vtmFromDb);
+                        if (vtmJson.RootElement.TryGetProperty("vtm", out var vtmEl) && 
+                            vtmEl.TryGetProperty("id", out var vtmIdEl) && 
+                            vtmIdEl.ValueKind == JsonValueKind.Number)
+                        {
+                            var vtmIdVal = vtmIdEl.GetInt64();
+                            var vtmData = await _db.Vtm.FirstOrDefaultAsync(v => v.Id == vtmIdVal, ct);
+                            
+                            if (vtmData != null)
+                            {
+                                detalle.Vtm = new VtmDto
+                                {
+                                    Id = (int)vtmData.Id,
+                                    Nombre = vtmData.Nombre
+                                };
+                            }
+                        }
+                    }
+                    catch { /* Ignorar errores de parsing */ }
+                }
+            }
+
+            // Vías de administración con parsing defensivo
             if (root.TryGetProperty("viasAdministracion", out var vias) && vias.ValueKind == JsonValueKind.Array)
             {
                 foreach (var via in vias.EnumerateArray())
                 {
                     detalle.ViasAdministracion.Add(new ViaAdministracionDto
                     {
-                        Id = via.TryGetProperty("id", out var id) ? id.GetInt32() : 0,
+                        Id = via.TryGetProperty("id", out var id) && id.ValueKind == JsonValueKind.Number ? id.GetInt32() : 0,
                         Nombre = via.TryGetProperty("nombre", out var nombre) ? nombre.GetString() ?? "" : ""
                     });
                 }
+            }
+            
+            // FALLBACK Vías: Si JSON está vacío, leer desde tablas relacionales
+            if (detalle.ViasAdministracion.Count == 0)
+            {
+                var viasFromDb = await (from mv in _db.MedicamentoVia
+                    join v in _db.ViaAdministracion on mv.ViaId equals v.Id into viaJoin
+                    from v in viaJoin.DefaultIfEmpty()
+                    where mv.NRegistro == nregistro
+                    select new ViaAdministracionDto
+                    {
+                        Id = mv.ViaId,
+                        Nombre = v != null ? v.Nombre : ""
+                    }).ToListAsync(ct);
+                
+                detalle.ViasAdministracion.AddRange(viasFromDb);
             }
 
             // Principios activos - Intentar JSON primero, fallback a tablas relacionales

@@ -25,6 +25,11 @@ public class FarmaiDbContext(DbContextOptions<FarmaiDbContext> options) : DbCont
     // Entidades de composición (para fallback cuando JSON está vacío)
     public DbSet<MedicamentoSustancia> MedicamentoSustancia => Set<MedicamentoSustancia>();
     public DbSet<MedicamentoExcipiente> MedicamentoExcipiente => Set<MedicamentoExcipiente>();
+    public DbSet<MedicamentoAtc> MedicamentoAtc => Set<MedicamentoAtc>();
+    public DbSet<Atc> Atc => Set<Atc>();
+    public DbSet<Vtm> Vtm => Set<Vtm>();
+    public DbSet<MedicamentoVia> MedicamentoVia => Set<MedicamentoVia>();
+    public DbSet<ViaAdministracion> ViaAdministracion => Set<ViaAdministracion>();
     
     // Entidades para descarga de documentos
     public DbSet<DocumentDownloadBatch> DocumentDownloadBatch => Set<DocumentDownloadBatch>();
@@ -76,6 +81,25 @@ public class FarmaiDbContext(DbContextOptions<FarmaiDbContext> options) : DbCont
         modelBuilder.Entity<MedicamentoExcipiente>()
             .ToTable("MedicamentoExcipiente")
             .HasKey(x => new { x.NRegistro, x.ExcipienteId });
+        
+        // Configuración de MedicamentoAtc (clave compuesta)
+        modelBuilder.Entity<MedicamentoAtc>()
+            .ToTable("MedicamentoAtc")
+            .HasKey(x => new { x.NRegistro, x.Codigo });
+        
+        // Configuración de Atc
+        modelBuilder.Entity<Atc>().ToTable("Atc").HasKey(x => x.Codigo);
+        
+        // Configuración de Vtm
+        modelBuilder.Entity<Vtm>().ToTable("Vtm").HasKey(x => x.Id);
+        
+        // Configuración de MedicamentoVia (clave compuesta)
+        modelBuilder.Entity<MedicamentoVia>()
+            .ToTable("MedicamentoVia")
+            .HasKey(x => new { x.NRegistro, x.ViaId });
+        
+        // Configuración de ViaAdministracion
+        modelBuilder.Entity<ViaAdministracion>().ToTable("ViaAdministracion").HasKey(x => x.Id);
         
         // Configuración del grafo
         modelBuilder.Entity<GraphNode>().ToTable("graph_node").HasKey(x => new { x.NodeType, x.NodeKey });

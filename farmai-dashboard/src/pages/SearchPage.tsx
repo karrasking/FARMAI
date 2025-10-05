@@ -19,6 +19,7 @@ interface Medicamento {
   generico: boolean
   receta: boolean
   comercializado: boolean
+  biosimilar: boolean
 }
 
 interface SearchResponse {
@@ -33,13 +34,19 @@ interface SearchResponse {
 const searchMedicamentos = async (
   query: string,
   filterGenerico: boolean | null,
-  filterReceta: boolean | null
+  filterReceta: boolean | null,
+  filterComercializado: boolean | null,
+  filterBiosimilar: boolean | null,
+  filterHospitalario: boolean | null
 ): Promise<SearchResponse> => {
   const params = new URLSearchParams()
   
   if (query) params.append('q', query)
   if (filterGenerico !== null) params.append('generico', String(filterGenerico))
   if (filterReceta !== null) params.append('receta', String(filterReceta))
+  if (filterComercializado !== null) params.append('comercializado', String(filterComercializado))
+  if (filterBiosimilar !== null) params.append('biosimilar', String(filterBiosimilar))
+  if (filterHospitalario !== null) params.append('hospitalario', String(filterHospitalario))
   params.append('limit', '50')
 
   const response = await fetch(`http://localhost:5265/api/medicamentos/search?${params}`)
@@ -55,6 +62,9 @@ export function SearchPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [filterGenerico, setFilterGenerico] = useState<boolean | null>(null)
   const [filterReceta, setFilterReceta] = useState<boolean | null>(null)
+  const [filterComercializado, setFilterComercializado] = useState<boolean | null>(null)
+  const [filterBiosimilar, setFilterBiosimilar] = useState<boolean | null>(null)
+  const [filterHospitalario, setFilterHospitalario] = useState<boolean | null>(null)
   const [shouldSearch, setShouldSearch] = useState(false)
   
   // Estados para el modal de documentos
@@ -68,8 +78,8 @@ export function SearchPage() {
 
   // useQuery para búsqueda en API real
   const { data, isLoading, error } = useQuery({
-    queryKey: ['medicamentos-search', searchTerm, filterGenerico, filterReceta],
-    queryFn: () => searchMedicamentos(searchTerm, filterGenerico, filterReceta),
+    queryKey: ['medicamentos-search', searchTerm, filterGenerico, filterReceta, filterComercializado, filterBiosimilar, filterHospitalario],
+    queryFn: () => searchMedicamentos(searchTerm, filterGenerico, filterReceta, filterComercializado, filterBiosimilar, filterHospitalario),
     enabled: shouldSearch, // Solo busca cuando el usuario hace click en Buscar
     staleTime: 30000 // Caché de 30 segundos
   })
@@ -124,6 +134,9 @@ export function SearchPage() {
   const handleClearFilters = () => {
     setFilterGenerico(null)
     setFilterReceta(null)
+    setFilterComercializado(null)
+    setFilterBiosimilar(null)
+    setFilterHospitalario(null)
     setSearchTerm('')
     setShouldSearch(false)
   }
@@ -234,7 +247,7 @@ export function SearchPage() {
 
             {/* Filters Panel */}
             {showFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Genérico
@@ -253,13 +266,6 @@ export function SearchPage() {
                       onClick={() => setFilterGenerico(filterGenerico === false ? null : false)}
                     >
                       No
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setFilterGenerico(null)}
-                    >
-                      Todos
                     </Button>
                   </div>
                 </div>
@@ -283,22 +289,82 @@ export function SearchPage() {
                     >
                       No
                     </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Comercializado
+                  </label>
+                  <div className="flex space-x-2">
                     <Button
                       size="sm"
-                      variant="ghost"
-                      onClick={() => setFilterReceta(null)}
+                      variant={filterComercializado === true ? "default" : "outline"}
+                      onClick={() => setFilterComercializado(filterComercializado === true ? null : true)}
                     >
-                      Todos
+                      Sí
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={filterComercializado === false ? "default" : "outline"}
+                      onClick={() => setFilterComercializado(filterComercializado === false ? null : false)}
+                    >
+                      No
                     </Button>
                   </div>
                 </div>
 
-                <div className="flex items-end">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Biosimilar
+                  </label>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant={filterBiosimilar === true ? "default" : "outline"}
+                      onClick={() => setFilterBiosimilar(filterBiosimilar === true ? null : true)}
+                    >
+                      Sí
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={filterBiosimilar === false ? "default" : "outline"}
+                      onClick={() => setFilterBiosimilar(filterBiosimilar === false ? null : false)}
+                    >
+                      No
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hospitalario
+                  </label>
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant={filterHospitalario === true ? "default" : "outline"}
+                      onClick={() => setFilterHospitalario(filterHospitalario === true ? null : true)}
+                    >
+                      Sí
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={filterHospitalario === false ? "default" : "outline"}
+                      onClick={() => setFilterHospitalario(filterHospitalario === false ? null : false)}
+                    >
+                      No
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex items-end col-span-full">
                   <Button
                     variant="ghost"
                     onClick={handleClearFilters}
+                    className="w-full"
                   >
-                    Limpiar filtros
+                    Limpiar todos los filtros
                   </Button>
                 </div>
               </div>
@@ -385,6 +451,11 @@ export function SearchPage() {
                       {med.comercializado && (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
                           Comercializado
+                        </span>
+                      )}
+                      {med.biosimilar && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          💊 Biosimilar
                         </span>
                       )}
                     </div>
