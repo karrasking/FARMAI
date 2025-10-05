@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { DocumentModal } from '@/components/DocumentModal'
+import MedicamentoDetailModal from '@/components/MedicamentoDetailModal'
+import type { MedicamentoDetalle } from '@/types/medicamento'
 import { Search, Filter, Eye, FileText, AlertCircle, BookOpen, Package, Microscope, Building2, Beaker, Activity, X, Loader2 } from 'lucide-react'
 
 // Tipos
@@ -11,6 +14,8 @@ interface Medicamento {
   nombre: string
   dosis?: string
   laboratorio?: string
+  laboratorioTitular?: string
+  laboratorioComercializador?: string
   generico: boolean
   receta: boolean
   comercializado: boolean
@@ -51,6 +56,15 @@ export function SearchPage() {
   const [filterGenerico, setFilterGenerico] = useState<boolean | null>(null)
   const [filterReceta, setFilterReceta] = useState<boolean | null>(null)
   const [shouldSearch, setShouldSearch] = useState(false)
+  
+  // Estados para el modal de documentos
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalDoc, setModalDoc] = useState<{ title: string; url: string; nregistro: string } | null>(null)
+  
+  // Estados para el modal de detalle
+  const [detalleModalOpen, setDetalleModalOpen] = useState(false)
+  const [selectedMedicamento, setSelectedMedicamento] = useState<MedicamentoDetalle | null>(null)
+  const [loadingDetalle, setLoadingDetalle] = useState(false)
 
   // useQuery para búsqueda en API real
   const { data, isLoading, error } = useQuery({
@@ -112,6 +126,39 @@ export function SearchPage() {
     setFilterReceta(null)
     setSearchTerm('')
     setShouldSearch(false)
+  }
+
+  const handleOpenDocument = (nregistro: string, tipo: 'ficha' | 'prospecto') => {
+    const baseUrl = 'https://cima.aemps.es/cima/pdfs'
+    const url = tipo === 'ficha' 
+      ? `${baseUrl}/ft/${nregistro}/FT_${nregistro}.pdf`
+      : `${baseUrl}/p/${nregistro}/P_${nregistro}.pdf`
+    
+    const title = tipo === 'ficha' ? 'Ficha Técnica' : 'Prospecto'
+    
+    setModalDoc({ title, url, nregistro })
+    setModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setModalOpen(false)
+    setModalDoc(null)
+  }
+
+  const handleVerDetalle = async (nregistro: string) => {
+    setLoadingDetalle(true)
+    try {
+      const response = await fetch(`http://localhost:5265/api/medicamentos/${nregistro}/detalle`)
+      if (!response.ok) throw new Error('Error al cargar detalle')
+      const detalle: MedicamentoDetalle = await response.json()
+      setSelectedMedicamento(detalle)
+      setDetalleModalOpen(true)
+    } catch (error) {
+      console.error('Error cargando detalle:', error)
+      alert('Error al cargar el detalle del medicamento')
+    } finally {
+      setLoadingDetalle(false)
+    }
   }
 
   return (
@@ -312,9 +359,18 @@ export function SearchPage() {
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                         N° {med.nregistro}
                       </span>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {med.laboratorio}
-                      </span>
+                      {med.laboratorioTitular && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <Building2 className="w-3 h-3 mr-1" />
+                          {med.laboratorioTitular}
+                        </span>
+                      )}
+                      {med.laboratorioComercializador && med.laboratorioComercializador !== med.laboratorioTitular && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                          <Package className="w-3 h-3 mr-1" />
+                          {med.laboratorioComercializador}
+                        </span>
+                      )}
                       {med.generico && (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                           Genérico (EFG)
@@ -338,15 +394,32 @@ export function SearchPage() {
             </CardHeader>
             <CardContent>
               <div className="flex space-x-2">
-                <Button size="sm" variant="outline">
-                  <Eye className="w-4 h-4 mr-2" />
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleVerDetalle(med.nregistro)}
+                  disabled={loadingDetalle}
+                >
+                  {loadingDetalle ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Eye className="w-4 h-4 mr-2" />
+                  )}
                   Ver Detalle
                 </Button>
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleOpenDocument(med.nregistro, 'ficha')}
+                >
                   <FileText className="w-4 h-4 mr-2" />
                   Ficha Técnica
                 </Button>
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => handleOpenDocument(med.nregistro, 'prospecto')}
+                >
                   <BookOpen className="w-4 h-4 mr-2" />
                   Prospecto
                 </Button>
@@ -385,6 +458,26 @@ export function SearchPage() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Modal de Documentos */}
+      {modalDoc && (
+        <DocumentModal
+          isOpen={modalOpen}
+          onClose={handleCloseModal}
+          title={modalDoc.title}
+          url={modalDoc.url}
+          nregistro={modalDoc.nregistro}
+        />
+      )}
+
+      {/* Modal de Detalle Medicamento */}
+      {selectedMedicamento && (
+        <MedicamentoDetailModal
+          medicamento={selectedMedicamento}
+          isOpen={detalleModalOpen}
+          onClose={() => setDetalleModalOpen(false)}
+        />
       )}
     </div>
   )

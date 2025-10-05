@@ -21,6 +21,11 @@ public class FarmaiDbContext(DbContextOptions<FarmaiDbContext> options) : DbCont
     public DbSet<Documento> Documento => Set<Documento>();
     public DbSet<GraphNode> GraphNode => Set<GraphNode>();
     public DbSet<GraphEdge> GraphEdge => Set<GraphEdge>();
+    
+    // Entidades para descarga de documentos
+    public DbSet<DocumentDownloadBatch> DocumentDownloadBatch => Set<DocumentDownloadBatch>();
+    public DbSet<DocumentDownloadLog> DocumentDownloadLog => Set<DocumentDownloadLog>();
+    public DbSet<DocumentDownloadRetry> DocumentDownloadRetry => Set<DocumentDownloadRetry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,7 +46,19 @@ public class FarmaiDbContext(DbContextOptions<FarmaiDbContext> options) : DbCont
         // --- Configuración para entidades del Dashboard ---
         modelBuilder.Entity<Presentacion>().ToTable("Presentacion").HasKey(x => x.CN);
         modelBuilder.Entity<SustanciaActiva>().ToTable("SustanciaActiva").HasKey(x => x.Id);
-        modelBuilder.Entity<Laboratorio>().ToTable("Laboratorio").HasKey(x => x.Codigo);
+        
+        // Configuración Laboratorio con relaciones
+        var lab = modelBuilder.Entity<Laboratorio>();
+        lab.ToTable("Laboratorio").HasKey(x => x.Id);
+        lab.HasMany(l => l.MedicamentosComoTitular)
+           .WithOne(m => m.LaboratorioTitular)
+           .HasForeignKey(m => m.LaboratorioTitularId)
+           .OnDelete(DeleteBehavior.SetNull);
+        lab.HasMany(l => l.MedicamentosComoComercializador)
+           .WithOne(m => m.LaboratorioComercializador)
+           .HasForeignKey(m => m.LaboratorioComercializadorId)
+           .OnDelete(DeleteBehavior.SetNull);
+        
         modelBuilder.Entity<Excipiente>().ToTable("Excipiente").HasKey(x => x.Id);
         modelBuilder.Entity<Biomarcador>().ToTable("Biomarcador").HasKey(x => x.Id);
         modelBuilder.Entity<Documento>().ToTable("Documento").HasKey(x => x.Id);

@@ -4,10 +4,10 @@
 > Sistema de conocimiento farmacéutico con medicina personalizada y seguridad integrada
 
 [![Estado](https://img.shields.io/badge/Estado-Producción-success)](.)
-[![Cobertura](https://img.shields.io/badge/Cobertura-100%25%20Medicamentos%20España-blue)](.)
-[![Grafo](https://img.shields.io/badge/Grafo-830K%20relaciones-purple)](.)
+[![Cobertura](https://img.shields.io/badge/Cobertura-99.98%25%20Completo-blue)](.)
+[![Grafo](https://img.shields.io/badge/Grafo-88K%20nodos%20|%20700K%20aristas-purple)](.)
 [![Dashboard](https://img.shields.io/badge/Dashboard-React%2018-61DAFB)](./)
-[![Actualización](https://img.shields.io/badge/Última%20Actualización-04%2F10%2F2025-orange)](.)
+[![Actualización](https://img.shields.io/badge/Última%20Actualización-05%2F10%2F2025-orange)](.)
 
 ---
 
@@ -34,9 +34,10 @@ FARMAI es una base de datos farmacéutica avanzada que integra información de *
 | Métrica | Valor | Descripción |
 |---------|-------|-------------|
 | **Medicamentos** | 20,271 | Autorizados por AEMPS |
+| **Datos Completos** | 20,266 (99.98%) | Con RawJson de API CIMA |
 | **Presentaciones** | 29,540 | Códigos nacionales (CN) |
 | **Nodos Grafo** | 88,661 | 27 tipos diferentes |
-| **Relaciones** | 742,101 | 27 tipos de conexiones |
+| **Relaciones** | 700,693 | 26 tipos de conexiones |
 | **Tamaño DB** | ~650 MB | Optimizado con índices |
 | **Performance** | 10-50x | Vs. queries directas |
 
@@ -566,10 +567,62 @@ docs/
 ### 🚧 Oportunidades de Mejora
 
 1. **Documentos**: 1.5% completitud (309/20K+) → Scraping masivo
-2. **Fotos**: 0.2% completitud (44/29K+) → Scraping masivo
-3. **Teratogenia**: Campo XML no parseado → Script Python
+2. **Teratogenia**: Campo XML no parseado → Requiere fuente externa
+3. **Materiales Informativos**: Integración pendiente
 4. **Farmacogenómica Avanzada**: Diplotipos + fenotipos
 5. **NLP**: Extracción información de fichas técnicas
+
+### ✅ Mejoras Recientes (Octubre 2025)
+
+- ✅ **Base de Datos Completa al 99.98%**: (5 Octubre 2025)
+  - **Backfill JSON Masivo**: 20,266 medicamentos con datos completos de API CIMA
+  - **15 Campos Propagados**: Todos los datos de negocio disponibles en tabla y grafo
+  - **4 Campos Nuevos Creados**:
+    - `AutorizadoPorEma` (99.98%): Medicamentos autorizados por EMA
+    - `TieneNotas` (99.98%): Medicamentos con notas AEMPS
+    - `RequiereReceta` (99.98%): Clasificación por receta/OTC
+    - `EsGenerico` (99.98%): Identificación genéricos vs originales
+  - **Grafo Enriquecido**: 20,271 nodos Medicamento con 15 campos de negocio
+  - **Tiempo de Ejecución**: 1.37 horas de procesamiento masivo
+  - **Estadísticas Actualizadas**:
+    - Genéricos: 10,906 (53.80%)
+    - Requieren Receta: 18,850 (92.99%)
+    - Autorizados EMA: 3,431 (16.93%)
+    - Con Notas: 3,849 (18.99%)
+
+
+- ✅ **Fotos de Medicamentos**: 27.9% completitud (11,196 fotos / 5,652 medicamentos)
+  - Extracción automática desde API CIMA
+  - 2 tipos: materialas (envase) + formafarmac (forma farmacéutica)
+  - URLs optimizadas con CDN CIMA
+
+- ✅ **Problemas de Suministro**: 2.6% medicamentos afectados (776 presentaciones)
+  - Nueva tabla `ProblemaSuministro` con 9 columnas
+  - Seguimiento temporal: fecha inicio/fin, estado activo
+  - Observaciones detalladas AEMPS
+  - Alertas desabastecimiento en tiempo real
+  - 4 índices optimizados para consultas rápidas
+
+- ✅ **Laboratorios: Sistema Completo Titular + Comercializador** (100% completitud)
+  - **Base de Datos:**
+    - 100% medicamentos con `LaboratorioTitularId` (20,271/20,271)
+    - 99.9% con `LaboratorioComercializadorId` (20,253/20,271)
+    - Relaciones FK configuradas con navigation properties bidireccionales
+    - 27 medicamentos corregidos desde JSON CIMA
+  - **Backend API (.NET 6):**
+    - Nuevo endpoint: `GET /api/dashboard/laboratorios`
+    - Top 10 Titulares, Comercializadores, y Combinados
+    - Endpoint búsqueda actualizado: incluye ambos laboratorios
+    - Navigation properties en EF Core configuradas
+  - **Frontend React:**
+    - Buscador muestra ambas etiquetas (Titular 🏢 + Comercializador 📦)
+    - Dashboard con gráfica "Top 10 Laboratorios" con datos reales
+    - Actualización automática cada 60 segundos
+    - Solo muestra comercializador si es diferente al titular
+  - **Estadísticas:**
+    - 34% medicamentos (6,936) tienen DIFERENTE comercializador
+    - Ej: TAMIFLU → Titular: Roche Registration / Comercializador: Roche Farma
+    - Top 3: Teva (1,959), Normon (1,402), Cinfa (1,360)
 
 ---
 
@@ -616,4 +669,4 @@ Este proyecto está bajo licencia MIT. Ver archivo [LICENSE](LICENSE) para más 
 
 **⚡ FARMAI - Transformando la información farmacéutica en conocimiento accionable**
 
-*Última actualización: 04/10/2025*
+*Última actualización: 05/10/2025 - Base de datos completa al 99.98%*

@@ -39,9 +39,16 @@ builder.Services.AddHttpClient<ICimaClient, CimaClient>(client =>
 builder.Services.AddHttpClient<IZipOrXmlFetcher, ZipOrXmlFetcher>();
 builder.Services.AddScoped<INomenclatorService, NomenclatorService>();
 
+// Servicio de descarga de documentos
+builder.Services.AddHttpClient("CimaDocuments", client =>
+{
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("Farmai.Api/1.0");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+builder.Services.AddScoped<IDocumentDownloadService, DocumentDownloadService>();
 
 builder.Services.AddScoped<ImportService>();
-builder.Services.AddScoped<SyncService>(); // <— añade esto
+builder.Services.AddScoped<SyncService>();
 
 var app = builder.Build();
 

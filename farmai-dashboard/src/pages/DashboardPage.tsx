@@ -40,6 +40,12 @@ const fetchKpis = async () => {
   return response.json()
 }
 
+const fetchLaboratorios = async () => {
+  const response = await fetch('http://localhost:5265/api/dashboard/laboratorios')
+  if (!response.ok) throw new Error('Error fetching Laboratorios')
+  return response.json()
+}
+
 const growthData = {
   labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
   datasets: [{
@@ -49,15 +55,6 @@ const growthData = {
     backgroundColor: 'rgba(59, 130, 246, 0.1)',
     tension: 0.4,
     fill: true,
-  }],
-}
-
-const topLabsData = {
-  labels: ['CINFA', 'NORMON', 'KERN PHARMA', 'SANDOZ', 'TEVA', 'STADA', 'RATIOPHARM', 'BAYER', 'PFIZER', 'NOVARTIS'],
-  datasets: [{
-    label: 'Medicamentos',
-    data: [1250, 1180, 1050, 980, 920, 850, 780, 720, 680, 650],
-    backgroundColor: 'rgba(59, 130, 246, 0.8)',
   }],
 }
 
@@ -101,6 +98,13 @@ export function DashboardPage() {
     refetchInterval: 30000 // Actualizar cada 30 segundos
   })
 
+  // Fetch laboratorios data
+  const { data: labsData } = useQuery({
+    queryKey: ['dashboard-laboratorios'],
+    queryFn: fetchLaboratorios,
+    refetchInterval: 60000 // Actualizar cada minuto
+  })
+
   // Usar datos del API o valores por defecto mientras carga
   const kpis = data || {
     medicamentos: 0,
@@ -112,6 +116,19 @@ export function DashboardPage() {
     biomarcadores: 0,
     documentos: 0,
     grafo: { totalNodos: 0, totalAristas: 0 }
+  }
+
+  // Generar datos para gráfica de laboratorios
+  const topLabsData = labsData?.topCombinados ? {
+    labels: labsData.topCombinados.map((l: any) => l.laboratorio),
+    datasets: [{
+      label: 'Medicamentos',
+      data: labsData.topCombinados.map((l: any) => l.medicamentos),
+      backgroundColor: 'rgba(59, 130, 246, 0.8)',
+    }],
+  } : {
+    labels: ['Cargando...'],
+    datasets: [{ label: 'Medicamentos', data: [0], backgroundColor: 'rgba(59, 130, 246, 0.8)' }]
   }
 
   if (error) {

@@ -17,6 +17,14 @@ public class Medicamento
     [MaxLength(256)]
     public string? LabTitular { get; set; }
 
+    // Foreign Keys a Laboratorio
+    public int? LaboratorioTitularId { get; set; }
+    public int? LaboratorioComercializadorId { get; set; }
+
+    // Navigation properties
+    public Laboratorio? LaboratorioTitular { get; set; }
+    public Laboratorio? LaboratorioComercializador { get; set; }
+
     public bool? Receta { get; set; }
     public bool? Generico { get; set; }
 

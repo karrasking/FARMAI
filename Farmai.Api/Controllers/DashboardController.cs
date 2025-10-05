@@ -55,4 +55,79 @@ public class DashboardController : ControllerBase
             return StatusCode(500, new { error = "Error al obtener KPIs", detalle = ex.Message, stack = ex.StackTrace });
         }
     }
+
+    /// <summary>
+    /// Obtiene estadísticas de laboratorios (titulares y comercializadores)
+    /// </summary>
+    [HttpGet("laboratorios")]
+    public async Task<IActionResult> GetLaboratorios(CancellationToken ct = default)
+    {
+        try
+        {
+            // Top 10 laboratorios titulares
+            var topTitulares = await _db.Medicamentos
+                .Where(m => m.LaboratorioTitularId != null)
+                .GroupBy(m => new { m.LaboratorioTitularId, m.LaboratorioTitular!.Nombre })
+                .Select(g => new
+                {
+                    laboratorio = g.Key.Nombre,
+                    medicamentos = g.Count(),
+                    tipo = "Titular"
+                })
+                .OrderByDescending(x => x.medicamentos)
+                .Take(10)
+                .ToListAsync(ct);
+
+            // Top 10 laboratorios comercializadores
+            var topComercializadores = await _db.Medicamentos
+                .Where(m => m.LaboratorioComercializadorId != null)
+                .GroupBy(m => new { m.LaboratorioComercializadorId, m.LaboratorioComercializador!.Nombre })
+                .Select(g => new
+                {
+                    laboratorio = g.Key.Nombre,
+                    medicamentos = g.Count(),
+                    tipo = "Comercializador"
+                })
+                .OrderByDescending(x => x.medicamentos)
+                .Take(10)
+                .ToListAsync(ct);
+
+            // Top 10 combinados (titular o comercializador) - CORREGIDO con Include
+            var todosMeds = await _db.Medicamentos
+                .Include(m => m.LaboratorioTitular)
+                .Include(m => m.LaboratorioComercializador)
+                .Where(m => m.LaboratorioTitularId != null || m.LaboratorioComercializadorId != null)
+                .ToListAsync(ct);
+
+            var topCombinados = todosMeds
+                .SelectMany(m => new[] 
+                { 
+                    new { LabId = m.LaboratorioTitularId, LabNombre = m.LaboratorioTitular?.Nombre },
+                    new { LabId = m.LaboratorioComercializadorId, LabNombre = m.LaboratorioComercializador?.Nombre }
+                })
+                .Where(x => x.LabId != null && !string.IsNullOrEmpty(x.LabNombre))
+                .GroupBy(x => x.LabNombre)
+                .Select(g => new
+                {
+                    laboratorio = g.Key,
+                    medicamentos = g.Count(),
+                    tipo = "Combinado"
+                })
+                .OrderByDescending(x => x.medicamentos)
+                .Take(10)
+                .ToList();
+
+            return Ok(new
+            {
+                topTitulares,
+                topComercializadores,
+                topCombinados,
+                timestamp = System.DateTime.UtcNow
+            });
+        }
+        catch (System.Exception ex)
+        {
+            return StatusCode(500, new { error = "Error al obtener laboratorios", detalle = ex.Message, stack = ex.StackTrace });
+        }
+    }
 }
